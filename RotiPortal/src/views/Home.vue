@@ -1,0 +1,197 @@
+<template>
+    <div class="container mt-4">
+        <h1 class="mb-4">Work From Home Portal</h1>
+
+        <!-- Navigation Tabs -->
+        <ul class="nav nav-tabs mb-4">
+            <li class="nav-item">
+                <a class="nav-link" :class="{ active: activeTab === 'staff' }" href="#"
+                    @click.prevent="activeTab = 'staff'">Staff Dashboard</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" :class="{ active: activeTab === 'manager' }" href="#"
+                    @click.prevent="activeTab = 'manager'">Manager Approval</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" :class="{ active: activeTab === 'report' }" href="#"
+                    @click.prevent="activeTab = 'report'">Management Report</a>
+            </li>
+        </ul>
+
+        <!-- Staff Dashboard -->
+        <div v-if="activeTab === 'staff'">
+            <h2>Staff Dashboard</h2>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h5 class="card-title">Apply for Work From Home</h5>
+                            <form @submit.prevent="submitWfhRequest">
+                                <div class="mb-3">
+                                    <label for="wfhType" class="form-label">Arrangement Type</label>
+                                    <select id="wfhType" v-model="wfhRequest.type" class="form-select" required>
+                                        <option value="regular">Regular Arrangement</option>
+                                        <option value="adhoc">Ad-hoc Arrangement</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="wfhDate" class="form-label">Date</label>
+                                    <input type="date" id="wfhDate" v-model="wfhRequest.date" class="form-control"
+                                        required>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Submit Request</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h5 class="card-title">Your WFH Requests</h5>
+                            <ul class="list-group">
+                                <li v-for="request in wfhRequests" :key="request.id"
+                                    class="list-group-item d-flex justify-content-between align-items-center">
+                                    {{ request.type }} - {{ request.date }}
+                                    <span
+                                        :class="['badge', request.status === 'Approved' ? 'bg-success' : 'bg-warning']">{{
+                    request.status }}</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Manager Approval Dashboard -->
+        <div v-if="activeTab === 'manager'">
+            <h2>Manager Approval Dashboard</h2>
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Pending Requests</h5>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Employee</th>
+                                <th>Type</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="request in pendingRequests" :key="request.id">
+                                <td>{{ request.employee }}</td>
+                                <td>{{ request.type }}</td>
+                                <td>{{ request.date }}</td>
+                                <td>
+                                    <button @click="approveRequest(request.id)"
+                                        class="btn btn-sm btn-success me-2">Approve</button>
+                                    <button @click="rejectRequest(request.id)"
+                                        class="btn btn-sm btn-danger">Reject</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Management Report -->
+        <div v-if="activeTab === 'report'">
+            <h2>Management Report</h2>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h5 class="card-title">Today's Office Presence</h5>
+                            <div class="display-4">75%</div>
+                            <p class="text-muted">45 out of 60 employees in office</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h5 class="card-title">Weekly WFH Trend</h5>
+                            <div class="placeholder-glow">
+                                <span class="placeholder col-12" style="height: 200px;"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Department Breakdown</h5>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Department</th>
+                                <th>Total Staff</th>
+                                <th>In Office</th>
+                                <th>WFH</th>
+                                <th>WFH %</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="dept in departmentBreakdown" :key="dept.name">
+                                <td>{{ dept.name }}</td>
+                                <td>{{ dept.totalStaff }}</td>
+                                <td>{{ dept.inOffice }}</td>
+                                <td>{{ dept.wfh }}</td>
+                                <td>{{ dept.wfhPercentage }}%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+<script>
+export default {
+    data() {
+        return {
+            activeTab: 'staff',
+            wfhRequest: {
+                type: 'regular',
+                date: ''
+            },
+            wfhRequests: [
+                { id: 1, type: 'Regular', date: '2023-06-16', status: 'Approved' },
+                { id: 2, type: 'Ad-hoc', date: '2023-06-20', status: 'Pending' }
+            ],
+            pendingRequests: [
+                { id: 1, employee: 'John Doe', type: 'Regular', date: '2023-06-16' },
+                { id: 2, employee: 'Jane Smith', type: 'Ad-hoc', date: '2023-06-20' }
+            ],
+            departmentBreakdown: [
+                { name: 'Engineering', totalStaff: 20, inOffice: 15, wfh: 5, wfhPercentage: 25 },
+                { name: 'Marketing', totalStaff: 15, inOffice: 10, wfh: 5, wfhPercentage: 33 },
+                { name: 'Sales', totalStaff: 25, inOffice: 20, wfh: 5, wfhPercentage: 20 }
+            ]
+        }
+    },
+    methods: {
+        submitWfhRequest() {
+            // Logic to submit WFH request
+            console.log('Submitting WFH request:', this.wfhRequest)
+            // Reset form after submission
+            this.wfhRequest = { type: 'regular', date: '' }
+        },
+        approveRequest(id) {
+            // Logic to approve request
+            console.log('Approving request:', id)
+        },
+        rejectRequest(id) {
+            // Logic to reject request
+            console.log('Rejecting request:', id)
+        }
+    }
+}
+</script>
+
+<style scoped>
+/* Add any component-specific styles here */
+</style>
