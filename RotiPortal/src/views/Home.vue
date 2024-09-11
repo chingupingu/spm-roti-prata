@@ -25,6 +25,11 @@
                     <a class="nav-link" :class="{ active: activeTab === 'report' }" href="#"
                         @click.prevent="activeTab = 'report'">Management Report</a>
                 </li>
+                <!-- TESTING  -->
+                <li class="nav-item" v-if="user == 'hr'">
+                    <a class="nav-link" :class="{ active: activeTab === 'testing' }" href="#"
+                        @click.prevent="activeTab = 'testing'">TESTING</a>
+                </li>
             </ul>
         </div>
 
@@ -109,6 +114,35 @@
             </div>
         </div>
 
+        <!-- TESTING -->
+        <div v-if="activeTab === 'testing'">
+            <div class="row align-items-start" style="margin-top: -130px;">
+                <h2>TESTING</h2>
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Pending Requests</h5>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Employee</th>
+                                    <th>Type</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="(employee, index) in employees" :key="employee.Staff_ID">
+                                    <td>{{ employee.Email }}</td>
+                                    <td>{{ employee.Country }}</td>
+                                    <td>{{ employee.Position }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Management Report -->
         <div v-if="activeTab === 'report'">
             <div class="row align-items-start" style="margin-top: 150px;">
@@ -166,9 +200,15 @@
 </template>
 
 <script>
+import { collection, doc, getDocs, deleteDoc } from "firebase/firestore"
+import { deleteObject, ref, getDownloadURL } from "firebase/storage"
+import { firebase_firestore, firebase_storage } from "../firebase"
+
 export default {
     data() {
         return {
+            employees: [],
+            isLoading: true,
             user: '',
             activeTab: 'staff',
             wfhRequest: {
@@ -208,10 +248,38 @@ export default {
         logout() {
             this.$router.push({ path: `/`, replace: true })
             sessionStorage.clear()
-        }
+        },
+        async fetchEmployeeData() {
+            const employeeCollection = collection(firebase_firestore, "Employee")
+
+            try {
+                const querySnapshot = await getDocs(employeeCollection)
+                let fetchedEmployees = []
+
+                for (const doc of querySnapshot.docs) {
+                // Access the data from each document
+                const employeeData = doc.data()
+
+                // Append the employee data to the fetchedEvents array
+                fetchedEmployees.push({ ...employeeData, id: doc.id })
+                console.log(employeeData)
+                }
+
+                // Set the fetchedEmployees data in your component's data
+                this.employees = fetchedEmployees
+                this.isLoading = false
+                console.log(fetchedEmployees)
+            } catch (error) {
+                console.error("Error getting documents: ", error)
+            }
+        },
     },
     mounted() {
         this.user = sessionStorage.getItem("user")
+        setTimeout(() => {
+        // Once data is loaded, set isLoading to false
+        this.fetchEmployeeData() // Fetch employee when the component is mounted
+        }, 500)
     }
 }
 </script>
