@@ -1,27 +1,35 @@
 <template>
-    <div class="container mt-4">
-        <h1 class="mb-4">Work From Home Portal</h1>
+    <div class="container">
+        <div class="row fixed-top pt-4 bg-white">
+            <h1 class="mb-4 display-3">RotiPortal</h1>
+            <!-- Logout Button -->
+             <div class="col d-flex justify-content-end pe-5 pt-4 position-absolute">
+                 <button class="btn btn-danger" @click="logout">
+                     Logout
+                 </button>
+             </div>
+            <!-- Navigation Tabs -->
+            <ul class="nav nav-tabs justify-content-center mb-4">
+                <li class="nav-item">
+                    <a class="nav-link" :class="{ active: activeTab === 'staff' }" href="#"
+                        @click.prevent="activeTab = 'staff'">Staff Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" :class="{ active: activeTab === 'manager' }" href="#"
+                        @click.prevent="activeTab = 'manager'">Manager Approval</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" :class="{ active: activeTab === 'report' }" href="#"
+                        @click.prevent="activeTab = 'report'">Management Report</a>
+                </li>
+            </ul>
+        </div>
 
-        <!-- Navigation Tabs -->
-        <ul class="nav nav-tabs mb-4">
-            <li class="nav-item">
-                <a class="nav-link" :class="{ active: activeTab === 'staff' }" href="#"
-                    @click.prevent="activeTab = 'staff'">Staff Dashboard</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" :class="{ active: activeTab === 'manager' }" href="#"
-                    @click.prevent="activeTab = 'manager'">Manager Approval</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" :class="{ active: activeTab === 'report' }" href="#"
-                    @click.prevent="activeTab = 'report'">Management Report</a>
-            </li>
-        </ul>
 
         <!-- Staff Dashboard -->
         <div v-if="activeTab === 'staff'">
-            <h2>Staff Dashboard</h2>
-            <div class="row">
+            <div class="row align-items-start" style="margin-top: -28dpx;">
+                <h2>Staff Dashboard</h2>
                 <div class="col-md-6">
                     <div class="card mb-4">
                         <div class="card-body">
@@ -54,7 +62,7 @@
                                     {{ request.type }} - {{ request.date }}
                                     <span
                                         :class="['badge', request.status === 'Approved' ? 'bg-success' : 'bg-warning']">{{
-                    request.status }}</span>
+                                        request.status }}</span>
                                 </li>
                             </ul>
                         </div>
@@ -65,87 +73,92 @@
 
         <!-- Manager Approval Dashboard -->
         <div v-if="activeTab === 'manager'">
-            <h2>Manager Approval Dashboard</h2>
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Pending Requests</h5>
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Employee</th>
-                                <th>Type</th>
-                                <th>Date</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="request in pendingRequests" :key="request.id">
-                                <td>{{ request.employee }}</td>
-                                <td>{{ request.type }}</td>
-                                <td>{{ request.date }}</td>
-                                <td>
-                                    <button @click="approveRequest(request.id)"
-                                        class="btn btn-sm btn-success me-2">Approve</button>
-                                    <button @click="rejectRequest(request.id)"
-                                        class="btn btn-sm btn-danger">Reject</button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+            <div class="row align-items-start" style="margin-top: -130px;">
+                <h2>Manager Approval Dashboard</h2>
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Pending Requests</h5>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Employee</th>
+                                    <th>Type</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="request in pendingRequests" :key="request.id">
+                                    <td>{{ request.employee }}</td>
+                                    <td>{{ request.type }}</td>
+                                    <td>{{ request.date }}</td>
+                                    <td>
+                                        <button @click="approveRequest(request.id)"
+                                            class="btn btn-sm btn-success me-2">Approve</button>
+                                        <button @click="rejectRequest(request.id)"
+                                            class="btn btn-sm btn-danger">Reject</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Management Report -->
         <div v-if="activeTab === 'report'">
-            <h2>Management Report</h2>
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="card mb-4">
-                        <div class="card-body">
-                            <h5 class="card-title">Today's Office Presence</h5>
-                            <div class="display-4">75%</div>
-                            <p class="text-muted">45 out of 60 employees in office</p>
+            <div class="row align-items-start" style="margin-top: 150px;">
+                <h2>Management Report</h2>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h5 class="card-title">Today's Office Presence</h5>
+                                <div class="display-4">75%</div>
+                                <p class="text-muted">45 out of 60 employees in office</p>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="card mb-4">
-                        <div class="card-body">
-                            <h5 class="card-title">Weekly WFH Trend</h5>
-                            <div class="placeholder-glow">
-                                <span class="placeholder col-12" style="height: 200px;"></span>
+                    <div class="col-md-6">
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h5 class="card-title">Weekly WFH Trend</h5>
+                                <div class="placeholder-glow">
+                                    <span class="placeholder col-12" style="height: 200px;"></span>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Department Breakdown</h5>
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Department</th>
-                                <th>Total Staff</th>
-                                <th>In Office</th>
-                                <th>WFH</th>
-                                <th>WFH %</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="dept in departmentBreakdown" :key="dept.name">
-                                <td>{{ dept.name }}</td>
-                                <td>{{ dept.totalStaff }}</td>
-                                <td>{{ dept.inOffice }}</td>
-                                <td>{{ dept.wfh }}</td>
-                                <td>{{ dept.wfhPercentage }}%</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Department Breakdown</h5>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Department</th>
+                                    <th>Total Staff</th>
+                                    <th>In Office</th>
+                                    <th>WFH</th>
+                                    <th>WFH %</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="dept in departmentBreakdown" :key="dept.name">
+                                    <td>{{ dept.name }}</td>
+                                    <td>{{ dept.totalStaff }}</td>
+                                    <td>{{ dept.inOffice }}</td>
+                                    <td>{{ dept.wfh }}</td>
+                                    <td>{{ dept.wfhPercentage }}%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
+
     </div>
 </template>
 
@@ -187,6 +200,10 @@ export default {
         rejectRequest(id) {
             // Logic to reject request
             console.log('Rejecting request:', id)
+        },
+        logout() {
+            this.$router.push({ path: `/`, replace: true })
+            sessionStorage.clear()
         }
     }
 }
