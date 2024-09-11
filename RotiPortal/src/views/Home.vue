@@ -10,15 +10,18 @@
              </div>
             <!-- Navigation Tabs -->
             <ul class="nav nav-tabs justify-content-center mb-4">
+                <!-- WFH dashboard -->
                 <li class="nav-item">
                     <a class="nav-link" :class="{ active: activeTab === 'staff' }" href="#"
-                        @click.prevent="activeTab = 'staff'">Staff Dashboard</a>
+                        @click.prevent="activeTab = 'staff'">WFH Dashboard</a>
                 </li>
-                <li class="nav-item">
+                <!-- manager approval -->
+                <li class="nav-item" v-if="user == 'manager'">
                     <a class="nav-link" :class="{ active: activeTab === 'manager' }" href="#"
                         @click.prevent="activeTab = 'manager'">Manager Approval</a>
                 </li>
-                <li class="nav-item">
+                <!-- management report -->
+                <li class="nav-item" v-if="user == 'hr'">
                     <a class="nav-link" :class="{ active: activeTab === 'report' }" href="#"
                         @click.prevent="activeTab = 'report'">Management Report</a>
                 </li>
@@ -28,9 +31,9 @@
 
         <!-- Staff Dashboard -->
         <div v-if="activeTab === 'staff'">
-            <div class="row align-items-start" style="margin-top: -28dpx;">
-                <h2>Staff Dashboard</h2>
-                <div class="col-md-6">
+            <div class="row align-items-start" style="margin-top: 150px;">
+                <h2>WFH Dashboard</h2>
+                <div class="col-12">
                     <div class="card mb-4">
                         <div class="card-body">
                             <h5 class="card-title">Apply for Work From Home</h5>
@@ -52,7 +55,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-6">
+                <div class="col-12">
                     <div class="card mb-4">
                         <div class="card-body">
                             <h5 class="card-title">Your WFH Requests</h5>
@@ -166,6 +169,7 @@
 export default {
     data() {
         return {
+            user: '',
             activeTab: 'staff',
             wfhRequest: {
                 type: 'regular',
@@ -205,6 +209,9 @@ export default {
             this.$router.push({ path: `/`, replace: true })
             sessionStorage.clear()
         }
+    },
+    mounted() {
+        this.user = sessionStorage.getItem("user")
     }
 }
 </script>
