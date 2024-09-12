@@ -3,11 +3,11 @@
         <div class="row fixed-top pt-4 bg-white">
             <h1 class="mb-4 display-3">RotiPortal</h1>
             <!-- Logout Button -->
-             <div class="col d-flex justify-content-end pe-5 pt-4 position-absolute">
-                 <button class="btn btn-danger" @click="logout">
-                     Logout
-                 </button>
-             </div>
+            <div class="col d-flex justify-content-end pe-5 pt-4 position-absolute">
+                <button class="btn btn-danger" @click="logout">
+                    Logout
+                </button>
+            </div>
             <!-- Navigation Tabs -->
             <ul class="nav nav-tabs justify-content-center mb-4">
                 <!-- WFH dashboard -->
@@ -15,10 +15,20 @@
                     <a class="nav-link" :class="{ active: activeTab === 'staff' }" href="#"
                         @click.prevent="activeTab = 'staff'">WFH Dashboard</a>
                 </li>
+                <!-- schedule -->
+                <li class="nav-item" v-if="user == 'manager'">
+                    <a class="nav-link" :class="{ active: activeTab === 'teamSchedule' }" href="#"
+                        @click.prevent="activeTab = 'teamSchedule'">Team Schedule</a>
+                </li>
                 <!-- manager approval -->
                 <li class="nav-item" v-if="user == 'manager'">
                     <a class="nav-link" :class="{ active: activeTab === 'manager' }" href="#"
                         @click.prevent="activeTab = 'manager'">Manager Approval</a>
+                </li>
+                <!-- company schedule -->
+                <li class="nav-item" v-if="user == 'hr'">
+                    <a class="nav-link" :class="{ active: activeTab === 'companySchedule' }" href="#"
+                        @click.prevent="activeTab = 'companySchedule'">Company Schedule</a>
                 </li>
                 <!-- management report -->
                 <li class="nav-item" v-if="user == 'hr'">
