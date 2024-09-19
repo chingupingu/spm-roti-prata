@@ -11,8 +11,8 @@
                 <div style="width: 400px;" class="bg-light rounded-3 p-3">
                     <h1 class="text-center">Login</h1>
                     <div class="mb-3">
-                        <label for="username" class="form-label">Username:</label>
-                        <input required v-model="username" type="text" class="form-control" id="username">
+                        <label for="email" class="form-label">Email:</label>
+                        <input required v-model="email" type="text" class="form-control" id="email">
                     </div>
                     <div class="mb-3">
                         <label for="password" class="form-label">Password:</label>
@@ -38,7 +38,7 @@ export default {
     name: 'login',
     data() {
         return {
-            username: '',
+            email: '',
             password: '',
             errorMsg: '',
         }
@@ -46,14 +46,19 @@ export default {
     methods: {
         authenticate() {
             this.errorMsg = ""
+            let name = this.email.split("@")[0]
+            let nameCap = name.charAt(0).toUpperCase() + name.slice(1)
+            let address = this.email.split("@")[1]
+
             if (this.password == "0000") {
-                if (this.username == "staff") {
+                sessionStorage.setItem("name", nameCap)
+                if (address == "staff.rp.com") {
                     sessionStorage.setItem("user", "staff")
                     this.redirect()
-                } else if (this.username == "manager") {
+                } else if (address == "manager.rp.com") {
                     sessionStorage.setItem("user", "manager")
                     this.redirect()
-                } else if(this.username == "hr") {
+                } else if(address == "hr.rp.com") {
                     sessionStorage.setItem("user", "hr")
                     this.redirect()
                 } else {
