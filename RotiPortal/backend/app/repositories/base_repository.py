@@ -13,7 +13,7 @@ class BaseRepository(ABC):
     
     def add(self, data):
         doc_ref = self.db.collection(self.collection_name).add(data)
-        return doc_ref.id
+        return doc_ref[1].id
     
     def get(self, id):
         doc = self.db.collection(self.collection_name).document(id).get()
@@ -27,4 +27,5 @@ class BaseRepository(ABC):
 
     def get_all(self):
         docs = self.db.collection(self.collection_name).stream()
-        return [doc.to_dict() for doc in docs]
+        # return [doc.to_dict() for doc in docs]
+        return [{"Staff_ID": doc.id, **doc.to_dict()} for doc in docs]

@@ -9,7 +9,7 @@ def register_routes(app):
     @app.route("/employee", methods=["POST"])
     def create_employee():
         data = request.json
-        doc_id = employee_service.create_employee(data["Staff_Fname"], 
+        doc_id = employee_service.create_employee(data["Staff_FName"], 
                                                   data["Staff_LName"], 
                                                   data["Dept"], 
                                                   data["Position"], 
@@ -18,19 +18,19 @@ def register_routes(app):
                                                   data["Reporting_Manager"], 
                                                   data["Role"]
                                                   )
-        return jsonify({"doc_id": doc_id}), 201
+        return jsonify({"Staff_ID": doc_id}), 201
     
-    @app.route('/employee/<doc_id>', methods=['GET'])
-    def get_employee(doc_id):
-        employee = employee_service.get_employee(doc_id)
+    @app.route('/employee/<staff_id>', methods=['GET'])
+    def get_employee(staff_id):
+        employee = employee_service.get_employee(staff_id)
         if employee:
             return jsonify(employee.__dict__)
         return jsonify({'error': 'User not found'}), 404
     
-    @app.route('/employee/<doc_id>', methods=['PUT'])
-    def update_employee(doc_id):
+    @app.route('/employee/<staff_id>', methods=['PUT'])
+    def update_employee(staff_id):
         data = request.json
-        employee = employee_service.get_employee(doc_id)
+        employee = employee_service.get_employee(staff_id)
         if employee:
             employee.Staff_FName = data.get('Staff_FName', employee.Staff_FName)
             employee.Staff_LName = data.get('Staff_LName', employee.Staff_LName)
@@ -40,16 +40,17 @@ def register_routes(app):
             employee.Email = data.get('Email', employee.Email)
             employee.Reporting_Manager = data.get('Reporting_Manager', employee.Reporting_Manager)
             employee.Role = data.get('Role', employee.Role)
-            employee_service.update_employee(employee)
+            employee_service.update_employee(staff_id, employee)
             return jsonify(employee.__dict__)
         return jsonify({'error': 'employee not found'}), 404
 
-    @app.route('/employee/<doc_id>', methods=['DELETE'])
-    def delete_employee(doc_id):
-        employee_service.delete_employee(doc_id)
+    @app.route('/employee/<staff_id>', methods=['DELETE'])
+    def delete_employee(staff_id):
+        employee_service.delete_employee(staff_id)
         return '', 204
 
     @app.route('/employee', methods=['GET'])
     def get_all_employees():
         employees = employee_service.get_all_employees()
-        return jsonify([employee.__dict__ for employee in employees])
+        # return jsonify([employee.__dict__ for employee in employees])
+        return jsonify(employees)
