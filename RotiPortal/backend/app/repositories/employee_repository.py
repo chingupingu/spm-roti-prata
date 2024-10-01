@@ -27,7 +27,7 @@ class EmployeeRepository(BaseRepository):
     def get_all_employees(self) -> list[Employee]:
         employees_data = self.get_all()
         # return [Employee(**employee_data) for employee_data in employees_data]
-        return [{"Staff_ID": employee_data.pop('Staff_ID'), **employee_data} for employee_data in employees_data]
+        return [{"Staff_ID": employee_data.pop("doc_id"), **employee_data} for employee_data in employees_data]
 
     def get_employee_by_email(self, email: str) -> Employee:
         employees = self.get_all()

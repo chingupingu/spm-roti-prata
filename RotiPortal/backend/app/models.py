@@ -23,3 +23,24 @@ class Employee:
                 Reporting_Manager={self.Reporting_Manager}, \
                 Role={self.Role}\
             )"
+    
+class WfhRequest:
+    def __init__(self, staff_id, date, shift, reason, recurring, attachment_url, status):
+        self.staff_id = staff_id
+        self.date = date
+        self.shift = shift
+        self.reason = reason
+        self.recurring = recurring
+        self.attachment_url = attachment_url
+        self.status = status
+    @staticmethod
+    def __repr__(self):
+        return f"WfhRequest(\
+                staff_id={self.staff_id}, \
+                date={self.date}, \
+                shift={self.shift}, \
+                reason={self.reason}, \
+                recurring={self.recurring}, \
+                attachment_url={self.attachment_url}\
+                status={self.status}\
+            )"

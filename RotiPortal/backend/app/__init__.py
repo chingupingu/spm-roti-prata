@@ -14,7 +14,9 @@ def create_app():
 
     # Use the credentials from the environment variable
     cred = credentials.Certificate(os.getenv('GOOGLE_APPLICATION_CREDENTIALS'))
-    initialize_app(cred)
+    initialize_app(cred, {
+        "storageBucket": "gs://roti-portal-392216.appspot.com"
+    })
 
     # Initialize Firestore
     db = firestore.Client()

@@ -6,8 +6,7 @@ class EmployeeService:
         self.employee_repository = EmployeeRepository()
 
     def create_employee(self, Staff_FName, Staff_LName, Dept, Position, Country, Email, Reporting_Manager, Role) -> str:
-        employee = Employee(
-                            Staff_FName=Staff_FName, 
+        employee = Employee(Staff_FName=Staff_FName, 
                             Staff_LName=Staff_LName, 
                             Dept=Dept, 
                             Position=Position, 

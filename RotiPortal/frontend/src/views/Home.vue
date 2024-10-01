@@ -49,21 +49,45 @@
             <div class="row align-items-start" style="margin-top: 150px;">
                 <h2>WFH Dashboard</h2>
                 <div class="col-12">
-                    <div class="card mb-4">
+                    <div class="card mb-4 p-3">
                         <div class="card-body">
-                            <h5 class="card-title">Apply for Work From Home</h5>
+                            <h5 class="card-title mb-4">Apply for Work From Home</h5>
                             <form @submit.prevent="submitWfhRequest">
-                                <div class="mb-3">
-                                    <label for="wfhType" class="form-label">Arrangement Type</label>
-                                    <select id="wfhType" v-model="wfhRequest.type" class="form-select" required>
-                                        <option value="regular">Regular Arrangement</option>
-                                        <option value="adhoc">Ad-hoc Arrangement</option>
-                                    </select>
-                                </div>
-                                <div class="mb-3">
+                                <!-- <div class="mb-3">
                                     <label for="wfhDate" class="form-label">Date</label>
                                     <input type="date" id="wfhDate" v-model="wfhRequest.date" class="form-control"
                                         required>
+                                </div> -->
+                                <div class="row">
+                                    <div class="col mb-3">
+                                        <label for="wfhDate" class="form-label">Date</label>
+                                        <v-date-picker v-model="wfhRequest.date" class="form-control">
+                                        <template v-slot="{ inputValue, inputEvents }">
+                                            <input
+                                            id="wfhDate"
+                                            :value="inputValue"
+                                            v-on="inputEvents"
+                                            class="form-control"
+                                            required
+                                            />
+                                        </template>
+                                        </v-date-picker>
+                                    </div>
+                                    <div class="col mb-3">
+                                        <label for="recurring" class="form-label">Arrangement</label>
+                                        <select name="recurring" id="recurring" v-model="wfhRequest.recurring" class="form-select">
+                                            <option value="true">Recurring</option>
+                                            <option value="false">Non-Recurring</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="reason" class="form-label">Reason</label>
+                                    <textarea id="reason" v-model="wfhRequest.reason" class="form-control" rows="3" required></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="attachments" class="form-label">Attachments</label>
+                                    <input type="file" id="attachments" v-on:change="wfhRequest.attachments" class="form-control">
                                 </div>
                                 <button type="submit" class="btn btn-primary">Submit Request</button>
                             </form>
@@ -210,11 +234,14 @@
 </template>
 
 <script>
-import { collection, doc, getDocs, deleteDoc } from "firebase/firestore"
-import { deleteObject, ref, getDownloadURL } from "firebase/storage"
-import { firebase_firestore, firebase_storage } from "../firebase"
-
+// import { collection, doc, getDocs, deleteDoc } from "firebase/firestore"
+// import { deleteObject, ref, getDownloadURL } from "firebase/storage"
+// import { firebase_firestore, firebase_storage } from "../firebase"
+import { DatePicker } from 'v-calendar';
 export default {
+    components: {
+        VDatePicker: DatePicker
+    },
     data() {
         return {
             employees: [],
@@ -223,8 +250,10 @@ export default {
             role: 0,
             activeTab: 'staff',
             wfhRequest: {
-                type: 'regular',
-                date: ''
+                date: '',
+                reason: '',
+                recurring: false,
+                attachments: null
             },
             wfhRequests: [
                 { id: 1, type: 'Regular', date: '2023-06-16', status: 'Approved' },
@@ -245,8 +274,15 @@ export default {
         submitWfhRequest() {
             // Logic to submit WFH request
             console.log('Submitting WFH request:', this.wfhRequest)
+            axios.post("http://localhost:5000/wfh_request", this.wfhRequest)
+            .then(response => {
+                console.log(response)
+            })
+            .catch(error => {
+                console.log(error)
+            })
             // Reset form after submission
-            this.wfhRequest = { type: 'regular', date: '' }
+            this.wfhRequest = {date: '', reason: '', attachments: null}
         },
         approveRequest(id) {
             // Logic to approve request
@@ -261,20 +297,21 @@ export default {
             sessionStorage.clear()
         },
         async fetchEmployeeData() {
-            const employeeCollection = collection(firebase_firestore, "Employee")
+            // const employeeCollection = collection(firebase_firestore, "Employee")
 
             try {
-                const querySnapshot = await getDocs(employeeCollection)
-                let fetchedEmployees = []
+                const fetchedEmployees = await axios.get("http://localhost:5000/employee")
+                // const querySnapshot = await getDocs(employeeCollection)
+                // let fetchedEmployees = []
 
-                for (const doc of querySnapshot.docs) {
-                // Access the data from each document
-                const employeeData = doc.data()
+                // for (const doc of querySnapshot.docs) {
+                // // Access the data from each document
+                // const employeeData = doc.data()
 
-                // Append the employee data to the fetchedEvents array
-                fetchedEmployees.push({ ...employeeData, id: doc.id })
-                console.log(employeeData)
-                }
+                // // Append the employee data to the fetchedEvents array
+                // fetchedEmployees.push({ ...employeeData, id: doc.id })
+                // console.log(employeeData)
+                // }
 
                 // Set the fetchedEmployees data in your component's data
                 this.employees = fetchedEmployees

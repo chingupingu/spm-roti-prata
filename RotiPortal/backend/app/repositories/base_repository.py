@@ -28,4 +28,4 @@ class BaseRepository(ABC):
     def get_all(self):
         docs = self.db.collection(self.collection_name).stream()
         # return [doc.to_dict() for doc in docs]
-        return [{"Staff_ID": doc.id, **doc.to_dict()} for doc in docs]
+        return [{"doc_id": doc.id, **doc.to_dict()} for doc in docs]
