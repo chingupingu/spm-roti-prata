@@ -54,3 +54,13 @@ def register_routes(app):
         employees = employee_service.get_all_employees()
         # return jsonify([employee.__dict__ for employee in employees])
         return jsonify(employees)
+
+    @app.route('/employee/login', methods=['POST'])
+    def check_email_exists():
+        data = request.json
+        email = data.get('email')
+        if not email:
+            return jsonify({'error': 'Email is required'}), 400
+        
+        exists = employee_service.get_employee_by_email(email)
+        return jsonify(exists)

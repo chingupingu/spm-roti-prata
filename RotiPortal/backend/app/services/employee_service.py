@@ -29,3 +29,6 @@ class EmployeeService:
 
     def get_all_employees(self) -> list[Employee]:
         return self.employee_repository.get_all_employees()
+
+    def get_employee_by_email(self, email: str) -> Employee:
+        return self.employee_repository.get_employee_by_email(email)

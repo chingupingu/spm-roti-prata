@@ -6,7 +6,7 @@
 
     <div class="container-fluid">
         <form @submit.prevent="authenticate()">
-            <!-- Project details form -->
+            <!-- Login form -->
             <div class="row justify-content-center my-3">
                 <div style="width: 400px;" class="bg-light rounded-3 p-3">
                     <h1 class="text-center">Login</h1>
@@ -44,53 +44,41 @@ export default {
         }
     },
     methods: {
-        authenticate() {
+        async authenticate() {
             this.errorMsg = ""
-            let name = this.email.split("@")[0]
-            let nameCap = name.charAt(0).toUpperCase() + name.slice(1)
-            let address = this.email.split("@")[1]
-
-            if (this.password == "0000") {
-                sessionStorage.setItem("name", nameCap)
-                if (address == "staff.rp.com") {
-                    sessionStorage.setItem("user", "staff")
-                    this.redirect()
-                } else if (address == "manager.rp.com") {
-                    sessionStorage.setItem("user", "manager")
-                    this.redirect()
-                } else if(address == "hr.rp.com") {
-                    sessionStorage.setItem("user", "hr")
-                    this.redirect()
+            
+            // Check if email exists
+            try {
+                const response = await axios.post("http://localhost:5000/employee/login", { email: this.email })
+                if (response.data) {
+                    // Continue with authentication if email exists
+                    if (this.password == "0000") {
+                        sessionStorage.setItem("employee_obj", JSON.stringify(response.data))
+                        this.redirect()
+                        // if (response.data.Role == "Staff") {
+                        //     sessionStorage.setItem("user", "staff")
+                        // } else if (address == "manager.rp.com") {
+                        //     sessionStorage.setItem("user", "manager")
+                        //     this.redirect()
+                        // } else if(address == "hr.rp.com") {
+                        //     sessionStorage.setItem("user", "hr")
+                        //     this.redirect()
+                        // } else {
+                        //     this.errorMsg = "Invalid email domain."
+                        // }
+                    } else {
+                        this.errorMsg = "Your password is incorrect."
+                    }
                 } else {
                     this.errorMsg = "This user does not exist."
+                    return
                 }
-            } else {
-                this.errorMsg = "Your password is incorrect."
+            } catch (error) {
+                console.error("Error checking email:", error)
+                this.errorMsg = "An error occurred while checking the email."
+                return
             }
-                
-            // this.errorMsg = ''
-            // const data = {
-            //     email: this.email,
-            //     password: this.password
-            // }
-            // axios.post("http://localhost:8000/user/auth?apikey=admin", data)
-            //     // axios.post("http://localhost:5010/user/auth", data)
-            //     .then(response => {
-            //         if (response.data.code == 401) {
-            //             this.errorMsg = response.data.message
-            //         }
-            //         else if (response.data.code == 201) {
-            //             this.errorMsg = ''
-            //             sessionStorage.setItem('isLoggedIn', 'true')
-            //             sessionStorage.setItem('user', JSON.stringify(response.data.data))
-            //             this.redirect(JSON.parse(sessionStorage.getItem('user')).is_creator)
-            //         }
-            //     })
-            //     .catch(error => {
-            //         if (error.code == "ERR_BAD_REQUEST") {
-            //             this.errorMsg = 'User not found in database'
-            //         }
-            //     })
+
         },
 
 

@@ -16,27 +16,27 @@
                         @click.prevent="activeTab = 'staff'">WFH Dashboard</a>
                 </li>
                 <!-- schedule -->
-                <li class="nav-item" v-if="user == 'manager'">
+                <li class="nav-item" v-if="role == 3">
                     <a class="nav-link" :class="{ active: activeTab === 'teamSchedule' }" href="#"
                         @click.prevent="activeTab = 'teamSchedule'">Team Schedule</a>
                 </li>
                 <!-- manager approval -->
-                <li class="nav-item" v-if="user == 'manager'">
+                <li class="nav-item" v-if="role == 3">
                     <a class="nav-link" :class="{ active: activeTab === 'manager' }" href="#"
                         @click.prevent="activeTab = 'manager'">Manager Approval</a>
                 </li>
                 <!-- company schedule -->
-                <li class="nav-item" v-if="user == 'hr'">
+                <li class="nav-item" v-if="role == 1">
                     <a class="nav-link" :class="{ active: activeTab === 'companySchedule' }" href="#"
                         @click.prevent="activeTab = 'companySchedule'">Company Schedule</a>
                 </li>
                 <!-- management report -->
-                <li class="nav-item" v-if="user == 'hr'">
+                <li class="nav-item" v-if="role == 1">
                     <a class="nav-link" :class="{ active: activeTab === 'report' }" href="#"
                         @click.prevent="activeTab = 'report'">Management Report</a>
                 </li>
                 <!-- TESTING  -->
-                <li class="nav-item" v-if="user == 'hr'">
+                <li class="nav-item" v-if="role == 1">
                     <a class="nav-link" :class="{ active: activeTab === 'testing' }" href="#"
                         @click.prevent="activeTab = 'testing'">TESTING</a>
                 </li>
@@ -219,7 +219,8 @@ export default {
         return {
             employees: [],
             isLoading: true,
-            user: '',
+            employee_obj: {},
+            role: 0,
             activeTab: 'staff',
             wfhRequest: {
                 type: 'regular',
@@ -285,7 +286,8 @@ export default {
         },
     },
     mounted() {
-        this.user = sessionStorage.getItem("user")
+        this.employee_obj = JSON.parse(sessionStorage.getItem("employee_obj"))
+        this.role = this.employee_obj.Role
         setTimeout(() => {
         // Once data is loaded, set isLoading to false
         this.fetchEmployeeData() // Fetch employee when the component is mounted
