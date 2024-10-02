@@ -1,2 +1,11 @@
 .env
 node_modules
+# Ignore Python bytecode files
+*.pyc
+
+# Ignore __pycache__ directories
+__pycache__/
+
+# Ignore specific __pycache__ files (if needed)
+**/app/services/__pycache__/*.cpython-311.pyc
+**/app/repositories/__pycache__/*.cpython-311.pyc
