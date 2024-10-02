@@ -144,11 +144,11 @@
                         <input id="teamMemberFilter" v-model="teamMemberFilter" class="form-control" placeholder="Enter team member name">
                     </div>
 
-                    <div class="col-md-4">
+                    <!-- <div class="col-md-4">
                         <label for="dateFilter" class="form-label">Filter by Date Range:</label>
                         <input type="date" v-model="startDate" class="form-control mb-1" placeholder="Start Date">
                         <input type="date" v-model="endDate" class="form-control" placeholder="End Date">
-                    </div>
+                    </div> -->
                 </div>
 
                 <div class="row mb-3">
@@ -523,18 +523,11 @@ export default {
     mounted() {
         this.employee_obj = JSON.parse(sessionStorage.getItem("employee_obj"))
         this.role = this.employee_obj.Role
-<<<<<<< Updated upstream
-        setTimeout(() => {
-            this.fetchEmployeeData(); // Fetch employee data
-            this.fetchWorkArrangements(); // Fetch work arrangements data
-        }, 500);
-=======
         this.wfhRequest.staff_id = this.employee_obj.Staff_ID
         // setTimeout(() => {
         // // Once data is loaded, set isLoading to false
         // this.fetchEmployeeData() // Fetch employee when the component is mounted
         // }, 500)
->>>>>>> Stashed changes
     }
 }
 </script>
