@@ -15,7 +15,7 @@ class ScheduleService:
                             )
         return self.schedule_repository.add_schedule(schedule)
     
-    def get_schedule(self, doc_id: str) -> Schedule:
+    def get_schedule(self, doc_id: str) -> list[Schedule]:
         return self.schedule_repository.get_schedule(doc_id)
     
     def update_schedule(self, schedule: Schedule):

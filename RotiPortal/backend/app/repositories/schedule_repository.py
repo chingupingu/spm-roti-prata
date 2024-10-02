@@ -9,12 +9,10 @@ class ScheduleRepository(BaseRepository):
         schedule_data = schedule.__dict__
         return self.add(schedule_data)
     
-    def get_schedule(self, doc_id: str) -> Schedule:
-        schedule_data = self.get(doc_id)
-        if schedule_data:
-            schedule_data['doc_id'] = doc_id
-            return Schedule(**schedule_data)
-        return None
+    def get_schedule(self, doc_id: str) -> list[Schedule]:
+        all_schedules = self.get_all()
+        filtered_schedules = [Schedule(**schedule_data) for schedule_data in all_schedules if schedule_data['Staff_ID'] == doc_id]
+        return filtered_schedules
     
     def update_schedule(self, schedule: Schedule):
         schedule_data = schedule.__dict__

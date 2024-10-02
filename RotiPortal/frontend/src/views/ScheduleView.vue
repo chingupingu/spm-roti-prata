@@ -132,7 +132,7 @@
 
   onMounted(async () => {
     try {
-      const response = await axios.get('http://127.0.0.1:5000/schedule')
+      const response = await axios.get('http://127.0.0.1:5000/schedule/MNVlVVKmKsePyFBHAwVb')
       scheduleData.value = response.data
     } catch (error) {
       console.error('Error fetching schedule data:', error)

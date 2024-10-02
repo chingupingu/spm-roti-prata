@@ -164,10 +164,8 @@ def register_routes(app):
     
     @app.route('/schedule/<doc_id>', methods=['GET'])
     def get_schedule(doc_id):
-        schedule = schedule_service.get_schedule(doc_id)
-        if schedule:
-            return jsonify(schedule.__dict__)
-        return jsonify({'error': 'Schedule not found'}), 404
+        schedules = schedule_service.get_schedule(doc_id)
+        return jsonify([schedule.__dict__ for schedule in schedules])
     
     @app.route('/schedule/<doc_id>', methods=['PUT'])
     def update_schedule(doc_id):
