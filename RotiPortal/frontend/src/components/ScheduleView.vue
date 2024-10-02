@@ -79,9 +79,13 @@
         </div>
   
         <div class="mt-6 flex justify-center space-x-4">
-          <div v-for="(color, status) in statusColors" :key="status" class="flex items-center">
-            <div :class="`w-4 h-4 rounded ${color} mr-2`"></div>
-            <span class="text-sm text-gray-600">{{ status }}</span>
+          <!-- Iterate through each status category in statusColors -->
+          <div v-for="(subStatuses, status) in statusColors" :key="status">
+            <!-- Iterate through each sub-status and its color for the current status -->
+            <div v-for="(color, subStatus) in subStatuses" :key="subStatus" class="flex items-center">
+              <div :class="`w-4 h-4 rounded ${color} mr-2`"></div>
+              <span class="text-sm text-gray-600">{{ status }} {{ subStatus ? subStatus : '' }}</span>
+            </div>
           </div>
         </div>
       </div>
