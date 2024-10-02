@@ -6,6 +6,10 @@ node_modules
 # Ignore __pycache__ directories
 __pycache__/
 
-# Ignore specific __pycache__ files (if needed)
-**/app/services/__pycache__/*.cpython-311.pyc
-**/app/repositories/__pycache__/*.cpython-311.pyc
+# # Ignore specific __pycache__ files (if needed)
+# **/app/services/__pycache__/*.cpython-311.pyc
+# **/app/repositories/__pycache__/*.cpython-311.pyc
+# /RotiPortal/backend/app/__pycache__
+# /RotiPortal/backend/app/__pycache__/routes.cpython-311.pyc
+/RotiPortal/backend/app/repositories/__pycache__
+/RotiPortal/backend/app/services/__pycache__
