@@ -30,3 +30,23 @@ class Employee:
                 Reporting_Manager={self.Reporting_Manager}, \
                 Role={self.Role}\
             )"
+    
+class WorkArrangement:
+    def __init__(self, Date, Remarks, Shift, Staff_ID, Status, doc_id=None):
+        self.Date = Date
+        self.Remarks = Remarks
+        self.Shift = Shift
+        self.Staff_ID = Staff_ID
+        self.Status = Status
+        self.doc_id = doc_id
+
+    @staticmethod
+    def __repr__(self):
+        return f"WorkArrangement(\
+                doc_id={self.doc_id}, \
+                Date={self.Date}, \
+                Remarks={self.Remarks}, \
+                Shift={self.Shift}, \
+                Staff_ID={self.Staff_ID}, \
+                Status={self.Status}\
+            )"

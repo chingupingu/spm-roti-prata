@@ -1,8 +1,10 @@
 from flask import jsonify, request
 from .services.employee_service import EmployeeService
+from .services.work_arrangement_service import WorkArrangementService
 
 # instantiate services here
 employee_service = EmployeeService()
+work_arrangement_service = WorkArrangementService() 
 
 # add routes here
 def register_routes(app):
@@ -53,3 +55,13 @@ def register_routes(app):
     def get_all_employees():
         employees = employee_service.get_all_employees()
         return jsonify([employee.__dict__ for employee in employees])
+    
+    @app.route('/work_arrangements/filter', methods=['GET'])
+    def filter_work_arrangements():
+        status = request.args.get('status')
+        staff_id = request.args.get('staff_id')  # Adjusted for staff filtering
+        start_date = request.args.get('start_date')  # Format: YYYY-MM-DD
+        end_date = request.args.get('end_date')  # Format: YYYY-MM-DD
+        
+        arrangements = work_arrangement_service.filter_arrangements(status, staff_id, start_date, end_date)
+        return jsonify(arrangements)
