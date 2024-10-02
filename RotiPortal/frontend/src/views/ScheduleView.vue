@@ -91,35 +91,102 @@
   </template>
   
   <script setup>
-  import { ref, computed } from 'vue'
+  import { ref, computed, onMounted } from 'vue'
   import { ChevronLeftIcon, ChevronRightIcon, CalendarIcon } from 'lucide-vue-next'
+  import axios from 'axios'
   
   const views = ['Daily', 'Weekly', 'Monthly']
   const currentView = ref('Weekly')
   const currentDate = ref(new Date())
   const formattedDateForInput = ref(currentDate.value.toISOString().slice(0, 10))
   
+  // const statusColors = {
+  //   'Work from Office': 'bg-blue-200',
+  //   'Work from Home Pending': 'bg-orange-200',
+  //   'Work from Home Approved': 'bg-green-200',
+  //   'Work from Home Rejected': 'bg-red-200',
+  //   'On Leave': 'bg-gray-200',
+  //   'No Status': 'bg-gray-100'
+  // }
+  
+  // Update statusColors to map work arrangement to color classes
   const statusColors = {
-    'Work from Office': 'bg-blue-200',
-    'Work from Home Pending': 'bg-orange-200',
-    'Work from Home Approved': 'bg-green-200',
-    'Work from Home Rejected': 'bg-red-200',
-    'On Leave': 'bg-gray-200'
-  }
-  
-  const schedule = ref({
-    'Mon Sep 02 2024': { AM: 'Work from Office', PM: 'Work from Office' },
-    'Tue Sep 03 2024': { AM: 'Work from Home Pending', PM: 'Work from Office' },
-    'Wed Sep 04 2024': { AM: 'Work from Office', PM: 'Work from Office' },
-    'Thu Sep 05 2024': { AM: 'Work from Home Approved', PM: 'Work from Home Approved' },
-    'Fri Sep 06 2024': { AM: 'Work from Home Rejected', PM: 'Work from Office' },
-    'Sat Sep 07 2024': { AM: 'Work from Office', PM: 'On Leave' },
-    'Sun Sep 08 2024': { AM: 'On Leave', PM: 'On Leave' },
+    'Work from Office': {
+      'Approved': 'bg-blue-200',
+    },
+    'Work from Home': {
+      'Approved': 'bg-green-200',
+      'Pending': 'bg-orange-200',
+      'Rejected': 'bg-red-200',
+    },
+    'On Leave': {
+      'Approved': 'bg-gray-200',
+    },
+    'No Status': {
+      'No Status': 'bg-gray-100',
+    },
+  };
+
+  // Adjusted schedule data to match the new structure
+  const scheduleData = ref([])
+
+  onMounted(async () => {
+    try {
+      const response = await axios.get('http://127.0.0.1:5000/schedule')
+      scheduleData.value = response.data
+    } catch (error) {
+      console.error('Error fetching schedule data:', error)
+    }
   })
+
+  // const scheduleData = ref([
+  //   {
+  //     Date: 'Mon Sep 01 2024 00:00:00 GMT',
+  //     Duration: 'FD',
+  //     Status: 'Pending',
+  //     Work_Arrangement: 'Work from Home'
+  //   },
+  //   {
+  //     Date: 'Mon Sep 02 2024 00:00:00 GMT',
+  //     Duration: 'PM',
+  //     Status: 'Approved',
+  //     Work_Arrangement: 'Work from Home'
+  //   },
+  //   {
+  //     Date: 'Tue Sep 03 2024 00:00:00 GMT',
+  //     Duration: 'AM',
+  //     Status: 'Approved',
+  //     Work_Arrangement: 'Work from Office'
+  //   },
+  //   {
+  //     Date: 'Tue Sep 03 2024 00:00:00 GMT',
+  //     Duration: 'PM',
+  //     Status: 'Rejected',
+  //     Work_Arrangement: 'Work from Home'
+  //   },
+  // ])
   
+  // Function to convert scheduleData into a mapping for easier access
+  const schedule = computed(() => {
+    const map = {};
+    scheduleData.value.forEach(entry => {
+      const dateStr = new Date(entry.Date).toDateString();
+
+      if (!map[dateStr]) {
+        map[dateStr] = { AM: { arrangement: 'No Status', status: 'No Status' }, PM: { arrangement: 'No Status', status: 'No Status' } };
+      }
+
+      const period = entry.Duration === 'FD' ? ['AM', 'PM'] : [entry.Duration];
+      period.forEach(p => {
+        map[dateStr][p] = { arrangement: entry.Work_Arrangement, status: entry.Status };
+      });
+    });
+    return map;
+  });
+
   const visibleDays = computed(() => {
     if (currentView.value === 'Monthly') {
-      return [] // We'll use monthlyCalendar for the monthly view
+      return [] // Use monthlyCalendar for monthly view
     }
   
     const days = []
@@ -194,23 +261,23 @@
   }
   
   const formattedDate = computed(() => {
-    const options = { year: 'numeric', month: 'long' };
+    const options = { year: 'numeric', month: 'long' }
   
     if (currentView.value === 'Daily') {
-      options.day = 'numeric';
-      return currentDate.value.toLocaleDateString('en-US', options);
+      options.day = 'numeric'
+      return currentDate.value.toLocaleDateString('en-US', options)
     }
   
     if (currentView.value === 'Weekly') {
-      const startOfWeek = new Date(currentDate.value);
-      const endOfWeek = new Date(startOfWeek);
-      startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
-      endOfWeek.setDate(startOfWeek.getDate() + 6);
+      const startOfWeek = new Date(currentDate.value)
+      const endOfWeek = new Date(startOfWeek)
+      startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay())
+      endOfWeek.setDate(startOfWeek.getDate() + 6)
   
-      return `${startOfWeek.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })} - ${endOfWeek.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}`;
+      return `${startOfWeek.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })} - ${endOfWeek.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}`
     }
   
-    return currentDate.value.toLocaleDateString('en-US', options);
+    return currentDate.value.toLocaleDateString('en-US', options)
   })
   
   const formatDay = (date) => {
@@ -231,11 +298,15 @@
   }
   
   const getStatusClass = (day, period) => {
-    const status = day.status[period]
-    return statusColors[status] || 'bg-gray-100'
-  }
-  
+    const arrangement = day.status[period]?.arrangement || 'No Status';
+    const status = day.status[period]?.status || 'No Status';
+    return statusColors[arrangement]?.[status] || 'bg-gray-100';
+  };
+
   const getStatusText = (day, period) => {
-    return day.status[period] || 'No Status'
-  }
+    const arrangement = day.status[period]?.arrangement || 'No Status';
+    const status = day.status[period]?.status || 'No Status';
+    return `${arrangement}`;
+  };
   </script>
+  

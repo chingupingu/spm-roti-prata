@@ -1,10 +1,12 @@
 from flask import jsonify, request
 from .services.employee_service import EmployeeService
 from .services.wfh_request_service import WfhRequestService
+from .services.schedule_service import ScheduleService
 
 # instantiate services here
 employee_service = EmployeeService()
 wfh_request_service = WfhRequestService()
+schedule_service = ScheduleService()
 
 # add routes here
 def register_routes(app):
@@ -66,7 +68,6 @@ def register_routes(app):
         email = data.get('email')
         if not email:
             return jsonify({'error': 'Email is required'}), 400
-        
         exists = employee_service.get_employee_by_email(email)
         return jsonify(exists)
     
@@ -74,7 +75,6 @@ def register_routes(app):
     ################################################################
     #                      WFH REQUESTS                            #
     ################################################################
-
     @app.route("/wfh_request", methods=["POST"])
     def create_wfh_request():
         data = request.json
@@ -147,3 +147,48 @@ def register_routes(app):
         wfh_request_service.delete_wfh_request(request_id)
         return '', 204
     
+
+    ################################################################
+    #                   SCHEDULE REQUESTS                          #
+    ################################################################
+    @app.route("/schedule", methods=["POST"])
+    def create_schedule():
+        data = request.json
+        doc_id = schedule_service.create_schedule(data["Staff_ID"], 
+                                                  data["Date"], 
+                                                  data["Duration"], 
+                                                  data["Status"], 
+                                                  data["Work_Arrangement"]
+                                                  )
+        return jsonify({"doc_id": doc_id}), 201
+    
+    @app.route('/schedule/<doc_id>', methods=['GET'])
+    def get_schedule(doc_id):
+        schedule = schedule_service.get_schedule(doc_id)
+        if schedule:
+            return jsonify(schedule.__dict__)
+        return jsonify({'error': 'Schedule not found'}), 404
+    
+    @app.route('/schedule/<doc_id>', methods=['PUT'])
+    def update_schedule(doc_id):
+        data = request.json
+        schedule = schedule_service.get_schedule(doc_id)
+        if schedule:
+            schedule.Staff_ID = data.get('Staff_ID', schedule.Staff_ID)
+            schedule.Date = data.get('Date', schedule.Date)
+            schedule.Duration = data.get('Duration', schedule.Duration)
+            schedule.Status = data.get('Status', schedule.Status)
+            schedule.Work_Arrangement = data.get('Work_Arrangement', schedule.Work_Arrangement)
+            schedule_service.update_schedule(schedule)
+            return jsonify(schedule.__dict__)
+        return jsonify({'error': 'Schedule not found'}), 404
+
+    @app.route('/schedule/<doc_id>', methods=['DELETE'])
+    def delete_schedule(doc_id):
+        schedule_service.delete_schedule(doc_id)
+        return '', 204
+
+    @app.route('/schedule', methods=['GET'])
+    def get_all_schedules():
+        schedules = schedule_service.get_all_schedules()
+        return jsonify([schedule.__dict__ for schedule in schedules])
