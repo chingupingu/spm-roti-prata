@@ -17,8 +17,8 @@
                 </li>
                 <!-- schedule -->
                 <li class="nav-item" v-if="role == 3">
-                    <a class="nav-link" :class="{ active: activeTab === 'teamSchedule' }" href="#"
-                        @click.prevent="activeTab = 'teamSchedule'">Team Schedule</a>
+                    <a class="nav-link" :class="{ active: activeTab === 'schedule' }" href="#"
+                        @click.prevent="activeTab = 'schedule'">Own Schedule</a>
                 </li>
                 <!-- manager approval -->
                 <li class="nav-item" v-if="role == 3">
@@ -121,6 +121,13 @@
             </div>
         </div>
 
+        <!-- Manager View Schedule Dashboard -->
+        <div v-if="activeTab === 'schedule'">
+            <div class="row align-items-start" style="margin-top: 200px;">
+                <h2>Own Schedule</h2>
+                <ScheduleView />
+            </div>
+        </div>
 
         <!-- Manager Approval Dashboard -->
         <div v-if="activeTab === 'manager'">
@@ -334,10 +341,12 @@
 import { DatePicker } from 'v-calendar';
 import axios from 'axios';
 import { useToast } from 'vue-toastification';
+import ScheduleView from '../components/ScheduleView.vue';
 
 export default {
     components: {
-        VDatePicker: DatePicker
+        VDatePicker: DatePicker,
+        ScheduleView
     },
     // setup() {
     //     const toast = useToast()
