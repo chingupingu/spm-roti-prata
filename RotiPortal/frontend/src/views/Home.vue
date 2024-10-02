@@ -76,9 +76,9 @@
                                     <div class="col mb-3">
                                         <label for="shift" class="form-label">Shift</label>
                                         <select name="shift" id="shift" v-model="wfhRequest.shift" class="form-select">
+                                            <option value="FD">Full Day</option>
                                             <option value="AM">AM</option>
                                             <option value="PM">PM</option>
-                                            <option value="FD">Full Day</option>
                                         </select>
                                     </div>
                                 </div>
