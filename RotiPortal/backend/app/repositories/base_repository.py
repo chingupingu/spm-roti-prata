@@ -29,3 +29,6 @@ class BaseRepository(ABC):
         docs = self.db.collection(self.collection_name).stream()
         # return [doc.to_dict() for doc in docs]
         return [{"doc_id": doc.id, **doc.to_dict()} for doc in docs]
+    
+    # def validate(self, data):
+    #     return self.db.collection(self.collection_name).where( '==', data.Email).get()

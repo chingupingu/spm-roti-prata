@@ -106,15 +106,62 @@
                     <div class="card mb-4">
                         <div class="card-body">
                             <h5 class="card-title">Your WFH Requests</h5>
-                            <ul class="list-group">
-                                <li v-for="request in wfhRequests" :key="request.id"
-                                    class="list-group-item d-flex justify-content-between align-items-center">
-                                    {{ request.type }} - {{ request.date }}
-                                    <span
-                                        :class="['badge', request.status === 'Approved' ? 'bg-success' : 'bg-warning']">{{
-                                        request.status }}</span>
-                                </li>
-                            </ul>
+                            <div class="row mt-4">
+                                <span v-if="your_requests.length == 0" class="text-muted fw-light"> No requests to display. </span>
+                                <span class="text-danger">{{ your_requests_error }}</span>
+                                <ul class="list-group">
+                                    <li v-for="request in sortedRequests" :key="request.request_id"
+                                        class="list-group-item d-flex justify-content-between align-items-center">
+                                        {{ formatDate(request.date) }} - {{ request.shift === 'FD' ? 'Full Day' : request.shift }}
+                                        <span
+                                            :class="['badge', request.status === 'Approved' ? 'bg-success' : 'bg-warning']">{{
+                                            request.status }}</span>
+                                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#requestModal" @click="viewRequest(request.request_id)">View</button>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- individual request modal -->
+                <div id="requestModal" class="modal" tabindex="-1">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">WFH Request Details</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <table class="table table-striped">
+                                    <tbody>
+                                        <tr>
+                                            <th>Date:</th>
+                                            <td>{{ formatDate(selectedRequest.date) }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Shift:</th>
+                                            <td>{{ selectedRequest.shift }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Recurring:</th>
+                                            <td>{{ selectedRequest.recurring }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Reason:</th>
+                                            <td>{{ selectedRequest.reason }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Attachments:</th>
+                                            <td>{{ selectedRequest.attachments }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Status:</th>
+                                            <td>{{ selectedRequest.status }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -333,15 +380,11 @@
 // import { firebase_firestore, firebase_storage } from "../firebase"
 import { DatePicker } from 'v-calendar';
 import axios from 'axios';
-import { useToast } from 'vue-toastification';
 
 export default {
     components: {
         VDatePicker: DatePicker
     },
-    // setup() {
-    //     const toast = useToast()
-    // },
     data() {
         return {
             employees: [],
@@ -358,10 +401,9 @@ export default {
                 attachments: null,
                 status: 'Pending'
             },
-            wfhRequests: [
-                { id: 1, type: 'Regular', date: '2023-06-16', status: 'Approved' },
-                { id: 2, type: 'Ad-hoc', date: '2023-06-20', status: 'Pending' }
-            ],
+            your_requests: [],
+            your_requests_error: '',
+            selectedRequest: {},
             pendingRequests: [
                 { id: 1, employee: 'John Doe', type: 'Regular', date: '2023-06-16' },
                 { id: 2, employee: 'Jane Smith', type: 'Ad-hoc', date: '2023-06-20' }
@@ -380,52 +422,63 @@ export default {
 
         }
     },
+    computed: {
+        sortedRequests() {
+            return [...this.your_requests].sort((a, b) => new Date(a.date) - new Date(b.date));
+        }
+    },
     methods: {
         submitWfhRequest() {
             // Logic to submit WFH request
             // console.log('Submitting WFH request:', this.wfhRequest)
             axios.post("http://localhost:5000/wfh_request", this.wfhRequest)
-            const toast = useToast()
             .then(response => {
                 console.log(response.data)
                 if (response.status == 201) {
-                    toast.success('Request submitted successfully!', {
-                        position: 'top-right',
-                        timeout: 5000,
-                        closeOnClick: true,
-                        pauseOnFocusLoss: true,
-                        pauseOnHover: true,
-                        draggable: true,
-                        draggablePercent: 0.6,
-                        showCloseButtonOnHover: false,
-                        hideProgressBar: true,
-                        closeButton: 'button',
-                        icon: true,
-                        rtl: false
-                    })
+                    window.alert('Request submitted successfully!')
+                    // Reset form after submission
+                    this.wfhRequest = {
+                        staff_id: this.employee_obj.Staff_ID,
+                        date: '',
+                        shift: 'FD',
+                        reason: '',
+                        recurring: false,
+                        attachments: null,
+                        status: 'Pending'
+                    }
+                    this.populateWfhRequests()
+
                 } else {
-                    toast.error('Request submission failed', {
-                        position: 'top-right',
-                        timeout: 5000,
-                        closeOnClick: true,
-                        pauseOnFocusLoss: true,
-                        pauseOnHover: true,
-                    })
+                    window.alert('Request submission failed')
                     throw new Error('Request submission failed')
                 }
             })
             .catch(error => {
                 console.log(error)
-                toast.error('Request could not be submitted. Please try again.', {
-                        position: 'top-right',
-                        timeout: 5000,
-                        closeOnClick: true,
-                        pauseOnFocusLoss: true,
-                        pauseOnHover: true,
-                    })
+                window.alert('Request could not be submitted. Please try again.')
             })
-            // Reset form after submission
-            this.wfhRequest = {date: '', reason: '', attachments: null}
+        },
+        populateWfhRequests() {
+            axios.get(`http://localhost:5000/wfh_request/staff/${this.employee_obj.Staff_ID}`)
+            .then(response => {
+                this.your_requests = response.data
+            })
+            .catch(error => {
+                this.your_requests_error = error.response.data.error
+            })
+        },
+        viewRequest(request_id) {
+            axios.get(`http://localhost:5000/wfh_request/${request_id}`)
+            .then(response => {
+                this.selectedRequest = response.data
+            })
+            .catch(error => {
+                console.log(error)
+            })
+        },
+        closeRequestModal() {
+            this.showRequestModal = false
+            this.selectedRequest = {}
         },
         approveRequest(id) {
             // Logic to approve request
@@ -439,6 +492,7 @@ export default {
             this.$router.push({ path: `/`, replace: true })
             sessionStorage.clear()
         },
+    
         async fetchEmployeeData() {
             // const employeeCollection = collection(firebase_firestore, "Employee")
 
@@ -518,12 +572,18 @@ export default {
             }
 
             console.log("Filtered Requests:", this.filteredRequests);
-        }
+        },
+        formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+        },
     },
     mounted() {
         this.employee_obj = JSON.parse(sessionStorage.getItem("employee_obj"))
         this.role = this.employee_obj.Role
         this.wfhRequest.staff_id = this.employee_obj.Staff_ID
+        this.populateWfhRequests()
+        
         // setTimeout(() => {
         // // Once data is loaded, set isLoading to false
         // this.fetchEmployeeData() // Fetch employee when the component is mounted

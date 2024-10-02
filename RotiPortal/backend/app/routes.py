@@ -78,21 +78,23 @@ def register_routes(app):
     @app.route("/wfh_request", methods=["POST"])
     def create_wfh_request():
         data = request.json
-        # attachment_file = None
-
-        # if data.get("attachment"):
-        #     attachment_file = data.get("attachment")
         attachment_file = data.get("attachment")
-        request_id = wfh_request_service.create_wfh_request(
-                                                    data["staff_id"], 
-                                                    data["date"], 
-                                                    data["shift"], 
-                                                    data["reason"], 
-                                                    data.get("recurring", False), 
-                                                    attachment_file,
-                                                    data["status"]
-                                                    )
-        return jsonify({"request_id": request_id}), 201
+        
+        result = wfh_request_service.create_wfh_request(
+            data["staff_id"], 
+            data["date"], 
+            data["shift"], 
+            data["reason"], 
+            data.get("recurring", False), 
+            attachment_file,
+            data["status"]
+        )
+        
+        if isinstance(result, tuple):
+            error_message, status_code = result
+            return jsonify({"error": error_message}), status_code
+        
+        return jsonify({"request_id": result}), 201
     
     @app.route('/wfh_request/<request_id>', methods=['GET'])
     def get_wfh_request(request_id):
