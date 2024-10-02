@@ -34,6 +34,18 @@ def register_routes(app):
             return jsonify(employee.__dict__)
         return jsonify({'error': 'User not found'}), 404
     
+    @app.route('/employee', methods=['GET'])
+    def get_all_employees():
+        employees = employee_service.get_all_employees()
+        # return jsonify([employee.__dict__ for employee in employees])
+        return jsonify(employees)
+
+    @app.route('/employee/manager/<manager_id>', methods=['GET'])
+    def get_all_employees_by_manager(manager_id):
+        employees = employee_service.get_all_employees_by_manager(manager_id)
+        # return jsonify([employee.__dict__ for employee in employees])
+        return jsonify(employees)
+    
     @app.route('/employee/<staff_id>', methods=['PUT'])
     def update_employee(staff_id):
         data = request.json
@@ -56,11 +68,6 @@ def register_routes(app):
         employee_service.delete_employee(staff_id)
         return '', 204
 
-    @app.route('/employee', methods=['GET'])
-    def get_all_employees():
-        employees = employee_service.get_all_employees()
-        # return jsonify([employee.__dict__ for employee in employees])
-        return jsonify(employees)
 
     @app.route('/employee/login', methods=['POST'])
     def check_email_exists():
