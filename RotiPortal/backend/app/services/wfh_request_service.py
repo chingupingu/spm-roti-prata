@@ -40,31 +40,34 @@ class WfhRequestService:
         #     return False, message
         return self.wfh_request_repository.add_wfh_request(wfh_request)
         
-    # def validate_wfh_request(self, wfh_request: WfhRequest) -> bool:
-    #     # Get the start and end of the week for the requested date
-    #     request_date = datetime.strptime(wfh_request.date, "%Y-%m-%d")
-    #     week_start = request_date - timedelta(days=request_date.weekday())
-    #     week_end = week_start + timedelta(days=6)
+    def validate_wfh_request(self, staff_id: str, date: str) -> tuple[bool, list[WfhRequest]]:
+        # Extract just the date part if a full datetime string is provided
+        date = date.split('T')[0]
+        
+        # Convert the date string to a datetime object
+        request_date = datetime.strptime(date, "%Y-%m-%d")
+        
+        # Get the start and end of the week for the requested date
+        week_start = request_date - timedelta(days=request_date.weekday())
+        week_end = week_start + timedelta(days=6)
 
-    #     # Get all WFH requests for the same staff within the week
-    #     week_requests = self.wfh_request_repository.get_wfh_requests_by_staff_id_and_date_range(
-    #         wfh_request.staff_id,
-    #         week_start.strftime("%Y-%m-%d"),
-    #         week_end.strftime("%Y-%m-%d")
-    #     )
+        week_requests = self.wfh_request_repository.get_wfh_requests_by_staff_id_and_date_range(
+            staff_id,
+            week_start,
+            week_end
+        )
+        # Check if there are already 2 or more WFH requests for the week
+        if len(week_requests) >= 2:
+            return (False, "You have exceeded the maximum of 2 WFH requests per week.")
 
-    #     # Check if there are already 2 or more WFH requests for the week
-    #     if len(week_requests) >= 2:
-    #         return False, "More than 2 WFH requests this week."
+        # Check if there's already a WFH request for the same day
+        same_day_requests = [req for req in week_requests if req['date'].split('T')[0] == date]
+        if same_day_requests:
+            return (False, "You already have a WFH request for this day.")
 
-    #     # Check if there's already a WFH request for the same day
-    #     same_day_requests = [req for req in week_requests if req.date == wfh_request.date]
-    #     if same_day_requests:
-    #         return False, "You already have a WFH request for this day."
+        # If we've passed all checks, the request is valid
+        return (True, "")
 
-    #     # If we've passed the above checks, proceed with any other validations
-    #     # return self.wfh_request_repository.validate_wfh_request(wfh_request)
-    #     return True
 
     def get_wfh_request(self, request_id: str) -> WfhRequest:
         return self.wfh_request_repository.get_wfh_request(request_id)

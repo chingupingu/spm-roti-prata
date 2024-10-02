@@ -1,5 +1,6 @@
 from .base_repository import BaseRepository
 from ..models import WfhRequest
+from datetime import datetime
 
 class WfhRequestRepository(BaseRepository):
     def _get_collection_name(self):
@@ -42,6 +43,13 @@ class WfhRequestRepository(BaseRepository):
     def delete_wfh_request(self, request_id: str):
         self.delete(request_id)
 
-    def get_wfh_requests_by_staff_id_and_date_range(self, staff_id: str, start_date: str, end_date: str) -> list[WfhRequest]:
+    def get_wfh_requests_by_staff_id_and_date_range(self, staff_id: str, start_date: datetime, end_date: datetime) -> list[WfhRequest]:
         wfh_requests_data = self.get_all()
-        return [{"request_id": wfh_request_data.pop("doc_id"), **wfh_request_data} for wfh_request_data in wfh_requests_data if wfh_request_data.get('staff_id') == staff_id and wfh_request_data.get('date') >= start_date and wfh_request_data.get('date') <= end_date]
+        filtered_requests = []
+        for wfh_request_data in wfh_requests_data:
+            if wfh_request_data.get('staff_id') == staff_id:
+                request_date_str = wfh_request_data.get('date')
+                request_date = datetime.strptime(request_date_str.split('T')[0], "%Y-%m-%d")
+                if start_date <= request_date <= end_date:
+                    filtered_requests.append({"request_id": wfh_request_data.pop("doc_id"), **wfh_request_data})
+        return filtered_requests

@@ -75,6 +75,14 @@ def register_routes(app):
     ################################################################
     #                      WFH REQUESTS                            #
     ################################################################
+    @app.route("/wfh_request/validate", methods=["POST"])
+    def validate_wfh_request():
+        data = request.json
+        staff_id = data.get("staff_id")
+        date = data.get("date")
+        valid, message = wfh_request_service.validate_wfh_request(staff_id, date)
+        return jsonify({"valid": valid, "message": message})
+
     @app.route("/wfh_request", methods=["POST"])
     def create_wfh_request():
         data = request.json

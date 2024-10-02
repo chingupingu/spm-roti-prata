@@ -52,7 +52,7 @@
                     <div class="card mb-4 p-3">
                         <div class="card-body">
                             <h5 class="card-title mb-4">Apply for Work From Home</h5>
-                            <form @submit.prevent="submitWfhRequest">
+                            <form @submit.prevent="validateWfhRequest">
                                 <!-- <div class="mb-3">
                                     <label for="wfhDate" class="form-label">Date</label>
                                     <input type="date" id="wfhDate" v-model="wfhRequest.date" class="form-control"
@@ -62,16 +62,17 @@
                                     <div class="col mb-3">
                                         <label for="wfhDate" class="form-label">Date</label>
                                         <v-date-picker v-model="wfhRequest.date" class="form-control">
-                                        <template v-slot="{ inputValue, inputEvents }">
-                                            <input
-                                            id="wfhDate"
-                                            :value="inputValue"
-                                            v-on="inputEvents"
-                                            class="form-control"
-                                            required
-                                            />
-                                        </template>
+                                            <template v-slot="{ inputValue, inputEvents }">
+                                                <input
+                                                id="wfhDate"
+                                                :value="inputValue"
+                                                v-on="inputEvents"
+                                                class="form-control"
+                                                required
+                                                />
+                                            </template>
                                         </v-date-picker>
+                                        <span class="text-danger">{{ wfh_request_error }}</span>
                                     </div>
                                     <div class="col mb-3">
                                         <label for="shift" class="form-label">Shift</label>
@@ -97,7 +98,7 @@
                                     <label for="attachments" class="form-label">Attachments</label>
                                     <input type="file" id="attachments" v-on:change="wfhRequest.attachments" class="form-control">
                                 </div>
-                                <button type="submit" class="btn btn-primary">Submit Request</button>
+                                <button type="submit" class="btn btn-primary">Submit Request</button> 
                             </form>
                         </div>
                     </div>
@@ -108,15 +109,17 @@
                             <h5 class="card-title">Your WFH Requests</h5>
                             <div class="row mt-4">
                                 <span v-if="your_requests.length == 0" class="text-muted fw-light"> No requests to display. </span>
-                                <span class="text-danger">{{ your_requests_error }}</span>
                                 <ul class="list-group">
                                     <li v-for="request in sortedRequests" :key="request.request_id"
                                         class="list-group-item d-flex justify-content-between align-items-center">
-                                        {{ formatDate(request.date) }} - {{ request.shift === 'FD' ? 'Full Day' : request.shift }}
+                                        {{ formatDateToDD_MMM_YYYY(request.date) }} - {{ request.shift === 'FD' ? 'Full Day' : request.shift }}
+                                        <div class="col">
+                                            
+                                        </div>
                                         <span
                                             :class="['badge', request.status === 'Approved' ? 'bg-success' : 'bg-warning']">{{
                                             request.status }}</span>
-                                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#requestModal" @click="viewRequest(request.request_id)">View</button>
+                                        <button class="btn btn-primary ms-4" data-bs-toggle="modal" data-bs-target="#requestModal" @click="viewRequest(request.request_id)">View</button>
                                     </li>
                                 </ul>
                             </div>
@@ -137,7 +140,7 @@
                                     <tbody>
                                         <tr>
                                             <th>Date:</th>
-                                            <td>{{ formatDate(selectedRequest.date) }}</td>
+                                            <td>{{ formatDateToDD_MMM_YYYY(selectedRequest.date) }}</td>
                                         </tr>
                                         <tr>
                                             <th>Shift:</th>
@@ -402,7 +405,7 @@ export default {
                 status: 'Pending'
             },
             your_requests: [],
-            your_requests_error: '',
+            wfh_request_error: '',
             selectedRequest: {},
             pendingRequests: [
                 { id: 1, employee: 'John Doe', type: 'Regular', date: '2023-06-16' },
@@ -428,9 +431,23 @@ export default {
         }
     },
     methods: {
+        validateWfhRequest() {
+            // Logic to validate WFH request
+            axios.post("http://localhost:5000/wfh_request/validate", this.wfhRequest)
+            .then(response => {
+                if (response.data.valid) {
+                    this.submitWfhRequest()
+                } else {
+                    window.alert(response.data.message)
+                    this.wfh_request_error = response.data.message
+                }
+            })
+            .catch(error => {
+                console.log(error)
+            })
+        },
         submitWfhRequest() {
             // Logic to submit WFH request
-            // console.log('Submitting WFH request:', this.wfhRequest)
             axios.post("http://localhost:5000/wfh_request", this.wfhRequest)
             .then(response => {
                 console.log(response.data)
@@ -447,15 +464,16 @@ export default {
                         status: 'Pending'
                     }
                     this.populateWfhRequests()
-
-                } else {
-                    window.alert('Request submission failed')
-                    throw new Error('Request submission failed')
                 }
+                // } else {
+                //     window.alert(response.data.error)
+                //     throw new Error('Request submission failed')
+                // }
             })
             .catch(error => {
-                console.log(error)
-                window.alert('Request could not be submitted. Please try again.')
+                // console.log(error)
+                // window.alert('Request could not be submitted. Please try again.')
+                window.alert(error.response.data.error)
             })
         },
         populateWfhRequests() {
@@ -573,10 +591,14 @@ export default {
 
             console.log("Filtered Requests:", this.filteredRequests);
         },
-        formatDate(dateString) {
+        formatDateToDD_MMM_YYYY(dateString) {
             const date = new Date(dateString);
             return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-        },
+        }
+        // formatDateForPicker(date) {
+        //     if (!date) return '';
+        //     return date.toISOString().split('T')[0];
+        // }
     },
     mounted() {
         this.employee_obj = JSON.parse(sessionStorage.getItem("employee_obj"))
