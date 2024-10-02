@@ -1,8 +1,6 @@
 <template>
-    <div class="min-h-screen bg-gray-100 p-8">
-      <div class="max-w-6xl mx-auto bg-white rounded-lg shadow-lg p-6">
-        <h1 class="text-3xl font-bold mb-6 text-center text-gray-800">Schedule View</h1>
-  
+    <div class="min-h-screen">
+      <div class="max-w-6xl mx-auto bg-white rounded-lg border-1 p-6">  
         <div class="mb-6 flex justify-between items-center">
           <div class="space-x-2">
             <button
@@ -100,14 +98,8 @@
   const currentDate = ref(new Date())
   const formattedDateForInput = ref(currentDate.value.toISOString().slice(0, 10))
   
-  // const statusColors = {
-  //   'Work from Office': 'bg-blue-200',
-  //   'Work from Home Pending': 'bg-orange-200',
-  //   'Work from Home Approved': 'bg-green-200',
-  //   'Work from Home Rejected': 'bg-red-200',
-  //   'On Leave': 'bg-gray-200',
-  //   'No Status': 'bg-gray-100'
-  // }
+  let employee_obj = ref(null);
+  let staff_id = ref("");
   
   // Update statusColors to map work arrangement to color classes
   const statusColors = {
@@ -132,39 +124,14 @@
 
   onMounted(async () => {
     try {
-      const response = await axios.get('http://127.0.0.1:5000/schedule/MNVlVVKmKsePyFBHAwVb')
+      employee_obj = JSON.parse(sessionStorage.getItem("employee_obj"))
+      staff_id = employee_obj.Staff_ID
+      const response = await axios.get('http://127.0.0.1:5000/schedule/' + staff_id)
       scheduleData.value = response.data
     } catch (error) {
       console.error('Error fetching schedule data:', error)
     }
   })
-
-  // const scheduleData = ref([
-  //   {
-  //     Date: 'Mon Sep 01 2024 00:00:00 GMT',
-  //     Duration: 'FD',
-  //     Status: 'Pending',
-  //     Work_Arrangement: 'Work from Home'
-  //   },
-  //   {
-  //     Date: 'Mon Sep 02 2024 00:00:00 GMT',
-  //     Duration: 'PM',
-  //     Status: 'Approved',
-  //     Work_Arrangement: 'Work from Home'
-  //   },
-  //   {
-  //     Date: 'Tue Sep 03 2024 00:00:00 GMT',
-  //     Duration: 'AM',
-  //     Status: 'Approved',
-  //     Work_Arrangement: 'Work from Office'
-  //   },
-  //   {
-  //     Date: 'Tue Sep 03 2024 00:00:00 GMT',
-  //     Duration: 'PM',
-  //     Status: 'Rejected',
-  //     Work_Arrangement: 'Work from Home'
-  //   },
-  // ])
   
   // Function to convert scheduleData into a mapping for easier access
   const schedule = computed(() => {
@@ -309,4 +276,3 @@
     return `${arrangement}`;
   };
   </script>
-  
