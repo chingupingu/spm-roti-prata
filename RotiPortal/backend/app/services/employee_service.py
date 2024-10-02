@@ -20,14 +20,18 @@ class EmployeeService:
     def get_employee(self, staff_id: str) -> Employee:
         return self.employee_repository.get_employee(staff_id)
     
+    def get_all_employees(self) -> list[Employee]:
+        return self.employee_repository.get_all_employees()
+    
+    def get_all_employees_by_manager(self, manager_id: str) -> list[Employee]:
+        return self.employee_repository.get_all_employees_by_manager(manager_id)
+    
     def update_employee(self, staff_id: str, employee: Employee):
         self.employee_repository.update_employee(staff_id, employee)
 
     def delete_employee(self, staff_id: str):
         self.employee_repository.delete_employee(staff_id)
 
-    def get_all_employees(self) -> list[Employee]:
-        return self.employee_repository.get_all_employees()
 
     def get_employee_by_email(self, email: str) -> Employee:
         return self.employee_repository.get_employee_by_email(email)

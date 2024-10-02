@@ -34,6 +34,18 @@ def register_routes(app):
             return jsonify(employee.__dict__)
         return jsonify({'error': 'User not found'}), 404
     
+    @app.route('/employee', methods=['GET'])
+    def get_all_employees():
+        employees = employee_service.get_all_employees()
+        # return jsonify([employee.__dict__ for employee in employees])
+        return jsonify(employees)
+
+    @app.route('/employee/manager/<manager_id>', methods=['GET'])
+    def get_all_employees_by_manager(manager_id):
+        employees = employee_service.get_all_employees_by_manager(manager_id)
+        # return jsonify([employee.__dict__ for employee in employees])
+        return jsonify(employees)
+    
     @app.route('/employee/<staff_id>', methods=['PUT'])
     def update_employee(staff_id):
         data = request.json
@@ -56,11 +68,6 @@ def register_routes(app):
         employee_service.delete_employee(staff_id)
         return '', 204
 
-    @app.route('/employee', methods=['GET'])
-    def get_all_employees():
-        employees = employee_service.get_all_employees()
-        # return jsonify([employee.__dict__ for employee in employees])
-        return jsonify(employees)
 
     @app.route('/employee/login', methods=['POST'])
     def check_email_exists():
@@ -75,24 +82,34 @@ def register_routes(app):
     ################################################################
     #                      WFH REQUESTS                            #
     ################################################################
+    @app.route("/wfh_request/validate", methods=["POST"])
+    def validate_wfh_request():
+        data = request.json
+        staff_id = data.get("staff_id")
+        date = data.get("date")
+        valid, message = wfh_request_service.validate_wfh_request(staff_id, date)
+        return jsonify({"valid": valid, "message": message})
+
     @app.route("/wfh_request", methods=["POST"])
     def create_wfh_request():
         data = request.json
-        # attachment_file = None
-
-        # if data.get("attachment"):
-        #     attachment_file = data.get("attachment")
         attachment_file = data.get("attachment")
-        request_id = wfh_request_service.create_wfh_request(
-                                                    data["staff_id"], 
-                                                    data["date"], 
-                                                    data["shift"], 
-                                                    data["reason"], 
-                                                    data.get("recurring", False), 
-                                                    attachment_file,
-                                                    data["status"]
-                                                    )
-        return jsonify({"request_id": request_id}), 201
+        
+        result = wfh_request_service.create_wfh_request(
+            data["staff_id"], 
+            data["date"], 
+            data["shift"], 
+            data["reason"], 
+            data.get("recurring", False), 
+            attachment_file,
+            data["status"]
+        )
+        
+        if isinstance(result, tuple):
+            error_message, status_code = result
+            return jsonify({"error": error_message}), status_code
+        
+        return jsonify({"request_id": result}), 201
     
     @app.route('/wfh_request/<request_id>', methods=['GET'])
     def get_wfh_request(request_id):

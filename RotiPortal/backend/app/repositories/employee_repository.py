@@ -16,14 +16,6 @@ class EmployeeRepository(BaseRepository):
             return Employee(**employee_data)
         return None
     
-    def update_employee(self, staff_id: str, employee: Employee):
-        employee_data = employee.__dict__
-        # doc_id = employee_data.pop('Staff_ID')
-        self.update(staff_id, employee_data)
-
-    def delete_employee(self, doc_id: str):
-        self.delete(doc_id)
-
     def get_all_employees(self) -> list[Employee]:
         employees_data = self.get_all()
         # return [Employee(**employee_data) for employee_data in employees_data]
@@ -35,3 +27,15 @@ class EmployeeRepository(BaseRepository):
             if employee.get('Email') == email:
                 return {"Staff_ID": employee.pop('doc_id'), **employee}
         return None
+    
+    def get_all_employees_by_manager(self, manager_id: str) -> list[Employee]:
+        employees = self.get_all()
+        return [{"Staff_ID": employee.pop('doc_id'), **employee} for employee in employees if employee.get('Reporting_Manager') == manager_id]
+    
+    def update_employee(self, staff_id: str, employee: Employee):
+        employee_data = employee.__dict__
+        # doc_id = employee_data.pop('Staff_ID')
+        self.update(staff_id, employee_data)
+
+    def delete_employee(self, doc_id: str):
+        self.delete(doc_id)
