@@ -113,38 +113,124 @@
             </div>
         </div>
 
+
         <!-- Manager Approval Dashboard -->
         <div v-if="activeTab === 'manager'">
-            <div class="row align-items-start" style="margin-top: -130px;">
+            <div class="row align-items-start" style="margin-top: 200px;">
                 <h2>Manager Approval Dashboard</h2>
+
+                <!-- Filter Section -->
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label for="statusFilter" class="form-label">Filter by Status:</label>
+                        <select id="statusFilter" v-model="statusFilter" class="form-select">
+                            <option value="">All</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Approved">Approved</option>
+                            <option value="Rejected">Rejected</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="teamMemberFilter" class="form-label">Filter by Team Member:</label>
+                        <input id="teamMemberFilter" v-model="teamMemberFilter" class="form-control" placeholder="Enter team member name">
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="dateFilter" class="form-label">Filter by Date Range:</label>
+                        <input type="date" v-model="startDate" class="form-control mb-1" placeholder="Start Date">
+                        <input type="date" v-model="endDate" class="form-control" placeholder="End Date">
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <button @click="filterRequests" class="btn btn-primary">Apply Filters</button>
+                    </div>
+                </div>
+
+                <!-- Requests Table -->
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Pending Requests</h5>
+                        <h5 class="card-title">Requests</h5>
                         <table class="table">
                             <thead>
                                 <tr>
                                     <th>Employee</th>
-                                    <th>Type</th>
                                     <th>Date</th>
+                                    <th>Reason</th>
+                                    <th>Status</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="request in pendingRequests" :key="request.id">
-                                    <td>{{ request.employee }}</td>
-                                    <td>{{ request.type }}</td>
+                                <tr 
+                                    v-for="request in filteredRequests" 
+                                    :key="request.id" 
+                                    :class="{'table-warning': request.status === 'Pending', 'table-success': request.status === 'Approved'}"
+                                >
+                                    <td>{{ request.staff_id }}</td>
                                     <td>{{ request.date }}</td>
+                                    <td>{{ request.reason }}</td>
+                                    <td>{{ request.status }}</td>
                                     <td>
-                                        <button @click="approveRequest(request.id)"
-                                            class="btn btn-sm btn-success me-2">Approve</button>
-                                        <button @click="rejectRequest(request.id)"
-                                            class="btn btn-sm btn-danger">Reject</button>
+                                        <button 
+                                            @click="openCommentModal('approve', request.id)" 
+                                            class="btn btn-sm btn-success me-2" 
+                                            v-if="request.status === 'Pending'"
+                                        >
+                                            Approve
+                                        </button>
+                                        <button 
+                                            @click="openCommentModal('reject', request.id)" 
+                                            class="btn btn-sm btn-danger" 
+                                            v-if="request.status === 'Pending'"
+                                        >
+                                            Reject
+                                        </button>
                                     </td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
+
+                <!-- Comment Modal -->
+                <!-- <div v-if="showCommentModal" class="modal" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Reason for {{ actionType === 'approve' ? 'Approval' : 'Rejection' }}</h5>
+                                <button type="button" class="btn-close" @click="closeCommentModal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <textarea v-model="comment" class="form-control" placeholder="Enter your reason"></textarea>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" @click="closeCommentModal">Cancel</button>
+                                <button type="button" class="btn btn-primary" @click="submitApprovalOrRejection">Submit</button>
+                            </div>
+                        </div>
+                    </div>
+                </div> -->
+
+                <!-- Confirmation Modal -->
+                <!-- <div v-if="showConfirmationModal" class="modal" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Confirmation</h5>
+                                <button type="button" class="btn-close" @click="closeConfirmationModal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p>{{ confirmationMessage }}</p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-primary" @click="closeConfirmationModal">OK</button>
+                            </div>
+                        </div>
+                    </div>
+                </div> -->
             </div>
         </div>
 
@@ -267,7 +353,14 @@ export default {
                 { name: 'Engineering', totalStaff: 20, inOffice: 15, wfh: 5, wfhPercentage: 25 },
                 { name: 'Marketing', totalStaff: 15, inOffice: 10, wfh: 5, wfhPercentage: 33 },
                 { name: 'Sales', totalStaff: 25, inOffice: 20, wfh: 5, wfhPercentage: 20 }
-            ]
+            ],
+            statusFilter: '',         // Initialize the status filter
+            teamMemberFilter: '',     // Initialize the team member filter
+            startDate: null,         // Initialize start date
+            endDate: null,           // Initialize end date
+            pendingRequests: [],      // This will hold all pending requests
+            filteredRequests: []     // This will hold filtered requests
+
         }
     },
     methods: {
@@ -321,18 +414,79 @@ export default {
                 console.error("Error getting documents: ", error)
             }
         },
+        async fetchWorkArrangements() { 
+            const workArrangementsRef = collection(firebase_firestore, 'WfhRequest'); // Change the collection name to 'WfhRequest'
+            
+            try {
+                const querySnapshot = await getDocs(workArrangementsRef);
+                let fetchedRequests = []; // Initialize an array to hold the fetched requests
+
+                for (const doc of querySnapshot.docs) {
+                    // Access the data from each document
+                    const requestData = doc.data();
+
+                    // Append the request data to the fetchedRequests array
+                    fetchedRequests.push({ ...requestData, id: doc.id });
+                    console.log(requestData); // Log each fetched request
+                }
+
+                // Set the fetchedRequests data in your component's data
+                this.requests = fetchedRequests; 
+                this.filteredRequests = this.requests; // Initialize filtered requests
+                console.log("Fetched Requests:", this.requests); // Log all fetched requests
+            } catch (error) {
+                console.error("Error getting documents: ", error);
+            }
+        },
+        filterRequests() {
+            // Reset filteredRequests to the full list of requests
+            this.filteredRequests = this.requests;
+
+            // Filter by Status
+            if (this.statusFilter) {
+                this.filteredRequests = this.filteredRequests.filter(request => request.status === this.statusFilter);
+            }
+            console.log("statusFilter:", this.statusFilter);
+
+            // Filter by Team Member (staff_id)
+            if (this.teamMemberFilter) {
+                this.filteredRequests = this.filteredRequests.filter(request => 
+                    request.staff_id.toLowerCase().includes(this.teamMemberFilter.toLowerCase())
+                );
+            }
+
+            // Filter by Date Range
+            if (this.startDate || this.endDate) {
+                this.filteredRequests = this.filteredRequests.filter(request => {
+                    const requestDate = new Date(request.date);
+                    const start = this.startDate ? new Date(this.startDate) : null;
+                    const end = this.endDate ? new Date(this.endDate) : null;
+
+                    // Check if the request date is within the specified range
+                    return (!start || requestDate >= start) && (!end || requestDate <= end);
+                });
+            }
+
+            console.log("Filtered Requests:", this.filteredRequests);
+        }
     },
     mounted() {
         this.employee_obj = JSON.parse(sessionStorage.getItem("employee_obj"))
         this.role = this.employee_obj.Role
         setTimeout(() => {
-        // Once data is loaded, set isLoading to false
-        this.fetchEmployeeData() // Fetch employee when the component is mounted
-        }, 500)
+            this.fetchEmployeeData(); // Fetch employee data
+            this.fetchWorkArrangements(); // Fetch work arrangements data
+        }, 500);
     }
 }
 </script>
 
 <style scoped>
 /* Add any component-specific styles here */
+.table-warning {
+    background-color: #fff3cd; /* Light yellow for pending requests */
+}
+.table-success {
+    background-color: #d4edda; /* Light green for approved requests */
+}
 </style>
