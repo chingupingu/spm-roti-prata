@@ -33,5 +33,5 @@ class EmployeeRepository(BaseRepository):
         employees = self.get_all()
         for employee in employees:
             if employee.get('Email') == email:
-                return {"Staff_ID": employee.pop('Staff_ID'), **employee}
+                return {"Staff_ID": employee.pop('doc_id'), **employee}
         return None

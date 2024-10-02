@@ -74,12 +74,20 @@
                                         </v-date-picker>
                                     </div>
                                     <div class="col mb-3">
-                                        <label for="recurring" class="form-label">Arrangement</label>
-                                        <select name="recurring" id="recurring" v-model="wfhRequest.recurring" class="form-select">
-                                            <option value="true">Recurring</option>
-                                            <option value="false">Non-Recurring</option>
+                                        <label for="shift" class="form-label">Shift</label>
+                                        <select name="shift" id="shift" v-model="wfhRequest.shift" class="form-select">
+                                            <option value="AM">AM</option>
+                                            <option value="PM">PM</option>
+                                            <option value="FD">Full Day</option>
                                         </select>
                                     </div>
+                                </div>
+                                <div class="col mb-3">
+                                    <label for="recurring" class="form-label">Arrangement</label>
+                                    <select name="recurring" id="recurring" v-model="wfhRequest.recurring" class="form-select">
+                                        <option value="true">Recurring</option>
+                                        <option value="false">Non-Recurring</option>
+                                    </select>
                                 </div>
                                 <div class="mb-3">
                                     <label for="reason" class="form-label">Reason</label>
@@ -324,10 +332,16 @@
 // import { deleteObject, ref, getDownloadURL } from "firebase/storage"
 // import { firebase_firestore, firebase_storage } from "../firebase"
 import { DatePicker } from 'v-calendar';
+import axios from 'axios';
+import { useToast } from 'vue-toastification';
+
 export default {
     components: {
         VDatePicker: DatePicker
     },
+    // setup() {
+    //     const toast = useToast()
+    // },
     data() {
         return {
             employees: [],
@@ -336,10 +350,13 @@ export default {
             role: 0,
             activeTab: 'staff',
             wfhRequest: {
+                staff_id: '',
                 date: '',
+                shift: 'FD',
                 reason: '',
                 recurring: false,
-                attachments: null
+                attachments: null,
+                status: 'Pending'
             },
             wfhRequests: [
                 { id: 1, type: 'Regular', date: '2023-06-16', status: 'Approved' },
@@ -366,13 +383,46 @@ export default {
     methods: {
         submitWfhRequest() {
             // Logic to submit WFH request
-            console.log('Submitting WFH request:', this.wfhRequest)
+            // console.log('Submitting WFH request:', this.wfhRequest)
             axios.post("http://localhost:5000/wfh_request", this.wfhRequest)
+            const toast = useToast()
             .then(response => {
-                console.log(response)
+                console.log(response.data)
+                if (response.status == 201) {
+                    toast.success('Request submitted successfully!', {
+                        position: 'top-right',
+                        timeout: 5000,
+                        closeOnClick: true,
+                        pauseOnFocusLoss: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        draggablePercent: 0.6,
+                        showCloseButtonOnHover: false,
+                        hideProgressBar: true,
+                        closeButton: 'button',
+                        icon: true,
+                        rtl: false
+                    })
+                } else {
+                    toast.error('Request submission failed', {
+                        position: 'top-right',
+                        timeout: 5000,
+                        closeOnClick: true,
+                        pauseOnFocusLoss: true,
+                        pauseOnHover: true,
+                    })
+                    throw new Error('Request submission failed')
+                }
             })
             .catch(error => {
                 console.log(error)
+                toast.error('Request could not be submitted. Please try again.', {
+                        position: 'top-right',
+                        timeout: 5000,
+                        closeOnClick: true,
+                        pauseOnFocusLoss: true,
+                        pauseOnHover: true,
+                    })
             })
             // Reset form after submission
             this.wfhRequest = {date: '', reason: '', attachments: null}
@@ -409,7 +459,7 @@ export default {
                 // Set the fetchedEmployees data in your component's data
                 this.employees = fetchedEmployees
                 this.isLoading = false
-                console.log(fetchedEmployees)
+                // console.log(fetchedEmployees)
             } catch (error) {
                 console.error("Error getting documents: ", error)
             }
@@ -473,10 +523,18 @@ export default {
     mounted() {
         this.employee_obj = JSON.parse(sessionStorage.getItem("employee_obj"))
         this.role = this.employee_obj.Role
+<<<<<<< Updated upstream
         setTimeout(() => {
             this.fetchEmployeeData(); // Fetch employee data
             this.fetchWorkArrangements(); // Fetch work arrangements data
         }, 500);
+=======
+        this.wfhRequest.staff_id = this.employee_obj.Staff_ID
+        // setTimeout(() => {
+        // // Once data is loaded, set isLoading to false
+        // this.fetchEmployeeData() // Fetch employee when the component is mounted
+        // }, 500)
+>>>>>>> Stashed changes
     }
 }
 </script>

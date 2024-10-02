@@ -5,7 +5,9 @@ import router from './router'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap'
 import 'v-calendar/dist/style.css'
+import Toast from 'vue-toastification'
+import 'vue-toastification/dist/index.css'
 
 const app = createApp(App)
-app.use(router)
+app.use(router, Toast)
 app.mount('#app')
