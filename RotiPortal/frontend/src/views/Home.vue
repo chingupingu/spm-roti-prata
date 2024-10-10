@@ -188,7 +188,7 @@
 
                 <!-- Filter Section -->
                 <div class="row mb-4">
-                    <div class="col-md-4 ms-2">
+                    <div class="col-md-6 d-flex flex-column">
                         <label for="statusFilter" class="form-label">Filter by Status:</label>
                         <select id="statusFilter" v-model="statusFilter" class="form-select">
                             <option value="">All</option>
@@ -198,10 +198,11 @@
                         </select>
                     </div>
 
-                    <div class="col-md-4">
+                    <div class="col-md-6 d-flex flex-column">
                         <label for="teamMemberFilter" class="form-label">Filter by Team Member:</label>
                         <input id="teamMemberFilter" v-model="teamMemberFilter" class="form-control" placeholder="Enter team member name">
                     </div>
+
                 </div>
 
                 <!-- Requests Table -->
@@ -222,8 +223,8 @@
                                 <tbody>
                                     <tr 
                                         v-for="request in filteredEmployeeRequests" 
-                                        :key="request.id" 
-                                        :class="{'table-warning': request.status === 'Pending', 'table-success': request.status === 'Approved'}"
+                                        :key="request.request_id" 
+                                        :class="{'table-warning': request.status === 'Pending', 'table-success': request.status === 'Approved', 'table-danger': request.status === 'Rejected'}"
                                     >
                                         <td>{{ getStaffName(request.staff_id) }}</td>
                                         <td>{{ formatDateToDD_MMM_YYYY(request.date) }}</td>
@@ -231,14 +232,14 @@
                                         <td>{{ request.status }}</td>
                                         <td>
                                             <button 
-                                                @click="openCommentModal('approve', request.id)" 
+                                                @click="openCommentModal('approve', request.request_id)" 
                                                 class="btn btn-sm btn-success me-2" 
                                                 v-if="request.status === 'Pending'"
                                             >
                                                 Approve
                                             </button>
                                             <button 
-                                                @click="openCommentModal('reject', request.id)" 
+                                                @click="openCommentModal('reject', request.request_id)" 
                                                 class="btn btn-sm btn-danger" 
                                                 v-if="request.status === 'Pending'"
                                             >
@@ -249,6 +250,47 @@
                                 </tbody>
                             </table>
                         </div>
+
+                        <!-- Comment Modal -->
+                        <div v-if="commentModalVisible" class="custom-backdrop fade show"></div>
+                        <div v-if="commentModalVisible" class="modal fade show" style="display: block;" tabindex="-1">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">{{ actionType === 'approve' ? 'Approve Request' : 'Reject Request' }}</h5>
+                                        <button type="button" class="btn-close" @click="commentModalVisible = false"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <table class="table table-striped">
+                                            <tbody>
+                                                <tr>
+                                                    <th>Date:</th>
+                                                    <td>{{ formatDateToDD_MMM_YYYY(selectedRequest.date) }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Shift:</th>
+                                                    <td>{{ selectedRequest.shift }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Reason:</th>
+                                                    <td>{{ selectedRequest.reason }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Attachments:</th>
+                                                    <td>{{ selectedRequest.attachments }}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                        <textarea v-model="comment" class="form-control" placeholder="Enter your comment for the above request..."></textarea>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" @click="commentModalVisible = false">Cancel</button>
+                                        <button type="button" class="btn btn-primary" @click="submitComment">Submit</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </div>
@@ -382,9 +424,13 @@ export default {
             isLoading: true,
             statusFilter: '',         // Initialize the status filter
             teamMemberFilter: '',     // Initialize the team member filter
-            startDate: null,         // Initialize start date
-            endDate: null,           // Initialize end date
+            dateMatch: null,         // Initialize the date filter
             employee_requests: [],      // This will hold all employee requests
+
+            commentModalVisible: false, // Control visibility of the modal
+            actionType: '',             // To store whether it's 'approve' or 'reject'
+            requestId: null,            // Store the request ID for the selected action
+            comment: '',                // Store the comment input from the user
             
             departmentBreakdown: [
                 { name: 'Engineering', totalStaff: 20, inOffice: 15, wfh: 5, wfhPercentage: 25 },
@@ -486,17 +532,96 @@ export default {
                 console.log(error)
             })
         },
-        approveRequest(id) {
-            // Logic to approve request
-            console.log('Approving request:', id)
-        },
-        rejectRequest(id) {
-            // Logic to reject request
-            console.log('Rejecting request:', id)
-        },
+        // approveRequest(id) {
+        //     // Logic to approve request
+        //     console.log('Approving request:', id)
+        // },
+        // rejectRequest(id) {
+        //     // Logic to reject request
+        //     console.log('Rejecting request:', id)
+        // },
         logout() {
             this.$router.push({ path: `/`, replace: true })
             sessionStorage.clear()
+        },
+        openCommentModal(actionType, requestId) {
+            console.log(requestId)
+            this.actionType = actionType; // Set the action type (approve or reject)
+            this.requestId = requestId;   // Set the request ID
+            this.comment = '';             // Reset comment input
+            this.commentModalVisible = true; // Show the modal
+            this.viewRequest(requestId);
+        },
+        submitComment() {
+            // Find the index of the request by requestId
+            const index = this.employee_requests.findIndex(request => request.request_id === this.requestId);
+
+            if (index !== -1) {
+                // Optimistically update the local status
+                const newStatus = this.actionType === 'approve' ? 'Approved' : 'Rejected';
+                this.employee_requests[index].status = newStatus;  // Update the status directly
+
+                // Submit the comment and status update
+                if (this.actionType === 'approve') {
+                    this.approveRequest(this.requestId, this.comment);
+                } else if (this.actionType === 'reject') {
+                    this.rejectRequest(this.requestId, this.comment);
+                }
+            }
+
+            // Hide the modal after submission
+            this.commentModalVisible = false;
+        },
+        approveRequest(requestId, comment) {
+            const payload = {
+                status: 'Approved',
+                comment: comment
+            };
+
+            // Make the API call to update the status in the backend
+            axios.put(`http://localhost:5000/wfh_request/${requestId}`, payload)
+                .then(() => {  
+                })
+                .catch(error => {
+                    console.error('Error updating request:', error);
+                    window.alert('Failed to approve request. Please try again.');
+                    
+                    // Optionally revert the optimistic update in case of an error
+                    const index = this.employee_requests.findIndex(request => request.request_id === requestId);
+                    if (index !== -1) {
+                        this.employee_requests[index].status = 'Pending';  // Revert to pending
+                    }
+                });
+        },
+        rejectRequest(requestId, comment) {
+            const payload = {
+                status: 'Rejected', // Change the status to Rejected
+                comment: comment    // Add the comment
+            };
+
+            // Find the index of the request in your local data
+            const index = this.employee_requests.findIndex(request => request.request_id === requestId);
+
+            // Optimistically update the local state
+            if (index !== -1) {
+                this.employee_requests[index].status = 'Rejected'; // Update the status to Rejected
+                // Optional: Remove it from the list if you want to hide it immediately
+                // this.employee_requests.splice(index, 1); // Uncomment if you want to remove the item
+            }
+
+            // Send a PUT request to the server to update the request
+            axios.put(`http://localhost:5000/wfh_request/${requestId}`, payload)
+                .then(() => {
+                    console.log(`Request ${requestId} rejected with comment: ${comment}`);
+                })
+                .catch(error => {
+                    console.error('Error updating request:', error);
+                    window.alert('Failed to reject request. Please try again.');
+                    // If the request fails, revert the optimistic update
+                    if (index !== -1) {
+                        this.employee_requests[index].status = 'Pending'; // Revert to pending if needed
+                    }
+                });
         },
         async fetchEmployeeData() {
             axios.get(`http://localhost:5000/employee/manager/${this.employee_obj.Staff_ID}`)
@@ -607,6 +732,9 @@ export default {
 .table-success {
     background-color: #d4edda; /* Light green for approved requests */
 }
+.table-danger {
+    background-color: #f8d7da; /* Light red for rejected requests */
+}
 
 .staff-dashboard,
 .manager-dashboard,
@@ -626,5 +754,15 @@ export default {
 .card {
     max-height: calc(100vh - 250px);
     overflow-y: auto;
+}
+
+.custom-backdrop {
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black */
+    position: fixed; /* Position it correctly */
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1040; /* Ensure it's behind the modal */
 }
 </style>
