@@ -88,7 +88,7 @@ export default {
             actionType: '',             // To store whether it's 'approve' or 'reject'
             requestId: null,            // Store the request ID for the selected action
             comment: '',                // Store the comment input from the user
-            
+            selectedRequest: {}
         }
     },
     computed: {
