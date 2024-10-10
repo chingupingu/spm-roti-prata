@@ -65,6 +65,46 @@
                 </div>
             </div>
         </div>
+
+        <!-- Comment Modal -->
+        <div v-if="commentModalVisible" class="custom-backdrop fade show"></div>
+        <div v-if="commentModalVisible" class="modal fade show" style="display: block;" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">{{ actionType === 'approve' ? 'Approve Request' : 'Reject Request' }}</h5>
+                        <button type="button" class="btn-close" @click="commentModalVisible = false"></button>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table table-striped">
+                            <tbody>
+                                <tr>
+                                    <th>Date:</th>
+                                    <td>{{ formatDateToDD_MMM_YYYY(selectedRequest.date) }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Shift:</th>
+                                    <td>{{ selectedRequest.shift }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Reason:</th>
+                                    <td>{{ selectedRequest.reason }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Attachments:</th>
+                                    <td>{{ selectedRequest.attachments }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <textarea v-model="comment" class="form-control" placeholder="Enter your comment for the above request..."></textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" @click="commentModalVisible = false">Cancel</button>
+                        <button type="button" class="btn btn-primary" @click="submitComment">Submit</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 </template>
 
 <script>
