@@ -196,12 +196,6 @@ export default {
 
 <style scoped>
 /* Add any component-specific styles here */
-.table-warning {
-    background-color: #fff3cd; /* Light yellow for pending requests */
-}
-.table-success {
-    background-color: #d4edda; /* Light green for approved requests */
-}
 
 /* Adjust card max-height for better visibility */
 .card {
