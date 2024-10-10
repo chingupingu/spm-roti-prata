@@ -60,74 +60,8 @@
 
         <!-- Manager Approval Dashboard -->
         <div v-if="activeTab === 'manager'" class="manager-dashboard">
-            <div class="row align-items-start" style="margin-top: 150px;">
-                <h2 class="mb-4">Manager Approval Dashboard</h2>
-
-                <!-- Filter Section -->
-                <div class="row mb-4">
-                    <div class="col-md-4 ms-2">
-                        <label for="statusFilter" class="form-label">Filter by Status:</label>
-                        <select id="statusFilter" v-model="statusFilter" class="form-select">
-                            <option value="">All</option>
-                            <option value="Pending">Pending</option>
-                            <option value="Approved">Approved</option>
-                            <option value="Rejected">Rejected</option>
-                        </select>
-                    </div>
-
-                    <div class="col-md-4">
-                        <label for="teamMemberFilter" class="form-label">Filter by Team Member:</label>
-                        <input id="teamMemberFilter" v-model="teamMemberFilter" class="form-control" placeholder="Enter team member name">
-                    </div>
-                </div>
-
-                <!-- Requests Table -->
-                <div class="card">
-                    <h5 class="card-title">Requests</h5>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>Employee</th>
-                                        <th>Date</th>
-                                        <th>Reason</th>
-                                        <th>Status</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr 
-                                        v-for="request in filteredEmployeeRequests" 
-                                        :key="request.id" 
-                                        :class="{'table-warning': request.status === 'Pending', 'table-success': request.status === 'Approved'}"
-                                    >
-                                        <td>{{ getStaffName(request.staff_id) }}</td>
-                                        <td>{{ formatDateToDD_MMM_YYYY(request.date) }}</td>
-                                        <td>{{ request.reason }}</td>
-                                        <td>{{ request.status }}</td>
-                                        <td>
-                                            <button 
-                                                @click="openCommentModal('approve', request.id)" 
-                                                class="btn btn-sm btn-success me-2" 
-                                                v-if="request.status === 'Pending'"
-                                            >
-                                                Approve
-                                            </button>
-                                            <button 
-                                                @click="openCommentModal('reject', request.id)" 
-                                                class="btn btn-sm btn-danger" 
-                                                v-if="request.status === 'Pending'"
-                                            >
-                                                Reject
-                                            </button>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
+            <div class="row align-items-start justify-content-center" style="margin-top: 150px;">
+                <ManagerApprovalView />
             </div>
         </div>
 
@@ -224,11 +158,12 @@
 import axios from 'axios';
 import ScheduleView from '../components/ScheduleView.vue';
 import WFHRequestView from '../components/WFHRequestView.vue';
-
+import ManagerApprovalView from '../components/ManagerApprovalView.vue';
 export default {
     components: {
+        WFHRequestView,
         ScheduleView,
-        WFHRequestView
+        ManagerApprovalView
     },
     data() {
         return {
@@ -365,19 +300,11 @@ export default {
 
         //     console.log("Filtered Requests:", this.filteredRequests);
         // },
-        formatDateToDD_MMM_YYYY(dateString) {
-            const date = new Date(dateString);
-            return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-        }
-        // formatDateForPicker(date) {
-        //     if (!date) return '';
-        //     return date.toISOString().split('T')[0];
-        // }
     },
     mounted() {
         this.employee_obj = JSON.parse(sessionStorage.getItem("employee_obj"))
         this.role = this.employee_obj.Role
-        this.fetchEmployeeData()
+        // this.fetchEmployeeData()
         // this.wfhRequest.staff_id = this.employee_obj.Staff_ID
         // this.populateWfhRequests()
         
@@ -407,10 +334,10 @@ export default {
     overflow-y: auto;
 } */
 
-.table-responsive {
+/* .table-responsive {
     max-height: calc(100vh - 350px);
     overflow-y: auto;
-}
+} */
 
 /* Adjust card max-height for better visibility */
 .card {
