@@ -172,15 +172,6 @@ export default {
             role: 0,
             activeTab: 'staff',
 
-            // manager approval data
-            employees: [],
-            isLoading: true,
-            statusFilter: '',         // Initialize the status filter
-            teamMemberFilter: '',     // Initialize the team member filter
-            startDate: null,         // Initialize start date
-            endDate: null,           // Initialize end date
-            employee_requests: [],      // This will hold all employee requests
-            
             departmentBreakdown: [
                 { name: 'Engineering', totalStaff: 20, inOffice: 15, wfh: 5, wfhPercentage: 25 },
                 { name: 'Marketing', totalStaff: 15, inOffice: 10, wfh: 5, wfhPercentage: 33 },
@@ -189,129 +180,16 @@ export default {
 
         }
     },
-    computed: {
-        filteredEmployeeRequests() {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0); // Set to start of day for accurate comparison
-            const filtered = this.employee_requests.filter(request => {
-            const statusMatch = !this.statusFilter || request.status === this.statusFilter;
-            const teamMemberMatch = !this.teamMemberFilter || 
-                this.getStaffName(request.staff_id).toLowerCase().includes(this.teamMemberFilter.toLowerCase());
-            const dateMatch = new Date(request.date) >= today;
-            return statusMatch && teamMemberMatch && dateMatch;
-        });
-            return [...filtered].sort((a, b) => new Date(a.date) - new Date(b.date));
-        },
-    },
+    computed: {},
     methods: {
-        getStaffName(staff_id) {
-            for (const employee of this.employees) {
-                if (employee.Staff_ID == staff_id) {
-                    return employee.Staff_FName + " " + employee.Staff_LName
-                }
-            }
-        },
-        approveRequest(id) {
-            // Logic to approve request
-            console.log('Approving request:', id)
-        },
-        rejectRequest(id) {
-            // Logic to reject request
-            console.log('Rejecting request:', id)
-        },
         logout() {
             this.$router.push({ path: `/`, replace: true })
             sessionStorage.clear()
         },
-        async fetchEmployeeData() {
-            axios.get(`http://localhost:5000/employee/manager/${this.employee_obj.Staff_ID}`)
-            .then(response => {
-                this.employees = response.data
-                this.fetchEmployeeRequests()
-            })
-            .catch(error => {
-                console.log(error)
-            })
-        },
-        async fetchEmployeeRequests() {
-            for (const employee of this.employees) {
-                axios.get(`http://localhost:5000/wfh_request/staff/${employee.Staff_ID}`)
-                .then(response => {
-                    this.employee_requests.push(...response.data)
-                })
-                .catch(error => {
-                    console.log(error)
-                })
-            }
-            console.log(this.pendingRequests)
-        },
-        // async fetchWorkArrangements() { 
-        //     const workArrangementsRef = collection(firebase_firestore, 'WfhRequest'); // Change the collection name to 'WfhRequest'
-            
-        //     try {
-        //         const querySnapshot = await getDocs(workArrangementsRef);
-        //         let fetchedRequests = []; // Initialize an array to hold the fetched requests
-
-        //         for (const doc of querySnapshot.docs) {
-        //             // Access the data from each document
-        //             const requestData = doc.data();
-
-        //             // Append the request data to the fetchedRequests array
-        //             fetchedRequests.push({ ...requestData, id: doc.id });
-        //             console.log(requestData); // Log each fetched request
-        //         }
-
-        //         // Set the fetchedRequests data in your component's data
-        //         this.requests = fetchedRequests; 
-        //         this.filteredRequests = this.requests; // Initialize filtered requests
-        //         console.log("Fetched Requests:", this.requests); // Log all fetched requests
-        //     } catch (error) {
-        //         console.error("Error getting documents: ", error);
-        //     }
-        // },
-        // filterRequests() {
-        //     // Reset filteredRequests to the full list of requests
-        //     this.filteredRequests = this.requests;
-
-        //     // Filter by Status
-        //     if (this.statusFilter) {
-        //         this.filteredRequests = this.filteredRequests.filter(request => request.status === this.statusFilter);
-        //     }
-        //     console.log("statusFilter:", this.statusFilter);
-
-        //     // Filter by Team Member (staff_id)
-        //     if (this.teamMemberFilter) {
-        //         this.filteredRequests = this.filteredRequests.filter(request => 
-        //             request.staff_id.toLowerCase().includes(this.teamMemberFilter.toLowerCase())
-        //         );
-        //     }
-
-        //     // Filter by Date Range
-        //     if (this.startDate || this.endDate) {
-        //         this.filteredRequests = this.filteredRequests.filter(request => {
-        //             const requestDate = new Date(request.date);
-        //             const start = this.startDate ? new Date(this.startDate) : null;
-        //             const end = this.endDate ? new Date(this.endDate) : null;
-
-        //             // Check if the request date is within the specified range
-        //             return (!start || requestDate >= start) && (!end || requestDate <= end);
-        //         });
-        //     }
-
-        //     console.log("Filtered Requests:", this.filteredRequests);
-        // },
     },
     mounted() {
         this.employee_obj = JSON.parse(sessionStorage.getItem("employee_obj"))
         this.role = this.employee_obj.Role
-        // this.fetchEmployeeData()
-        // this.wfhRequest.staff_id = this.employee_obj.Staff_ID
-        // this.populateWfhRequests()
-        
-        // setTimeout(() => {
-        // // Once data is loaded, set isLoading to false
-        // this.fetchEmployeeData() // Fetch employee when the component is mounted
-        // }, 500)
     }
 }
 </script>
@@ -324,20 +202,6 @@ export default {
 .table-success {
     background-color: #d4edda; /* Light green for approved requests */
 }
-
-/* .staff-dashboard,
-.manager-dashboard,
-.management-report,
-.own-schedule,
-.testing-dashboard {
-    height: calc(100vh - 135px);
-    overflow-y: auto;
-} */
-
-/* .table-responsive {
-    max-height: calc(100vh - 350px);
-    overflow-y: auto;
-} */
 
 /* Adjust card max-height for better visibility */
 .card {

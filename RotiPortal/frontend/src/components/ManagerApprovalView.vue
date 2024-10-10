@@ -36,7 +36,7 @@
                         <tbody>
                             <tr 
                                 v-for="request in filteredEmployeeRequests" 
-                                :key="request.id" 
+                                :key="request.request_id" 
                                 :class="{'table-warning': request.status === 'Pending', 'table-success': request.status === 'Approved'}"
                             >
                                 <td>{{ getStaffName(request.staff_id) }}</td>
@@ -45,14 +45,14 @@
                                 <td>{{ request.status }}</td>
                                 <td>
                                     <button 
-                                        @click="openCommentModal('approve', request.id)" 
+                                        @click="openCommentModal('approve', request.request_id)" 
                                         class="btn btn-sm btn-success me-2" 
                                         v-if="request.status === 'Pending'"
                                     >
                                         Approve
                                     </button>
                                     <button 
-                                        @click="openCommentModal('reject', request.id)" 
+                                        @click="openCommentModal('reject', request.request_id)" 
                                         class="btn btn-sm btn-danger" 
                                         v-if="request.status === 'Pending'"
                                     >
@@ -142,10 +142,13 @@ export default {
             const dateMatch = new Date(request.date) >= today;
             return statusMatch && teamMemberMatch && dateMatch;
         });
-        // Sort pending requests to the top, then by earliest date
+        // Sort requests: Pending at the top, then Approved, then Rejected
         return filtered.sort((a, b) => {
-            if (a.status === 'Pending' && b.status !== 'Pending') return -1;
-            if (a.status !== 'Pending' && b.status === 'Pending') return 1;
+            const statusOrder = { 'Pending': 0, 'Approved': 1, 'Rejected': 2 };
+            if (statusOrder[a.status] !== statusOrder[b.status]) {
+                return statusOrder[a.status] - statusOrder[b.status];
+            }
+            // If status is the same, sort by date (earliest first)
             return new Date(a.date) - new Date(b.date);
         });
     },
@@ -172,9 +175,11 @@ export default {
                 if (this.actionType === 'approve') {
                     this.approveRequest(this.requestId, this.comment);
                     window.alert('Request approved successfully!')
+                    this.$forceUpdate()
                 } else if (this.actionType === 'reject') {
                     this.rejectRequest(this.requestId, this.comment);
                     window.alert('Request rejected successfully!')
+                    this.$forceUpdate()
                 }
             }
 
