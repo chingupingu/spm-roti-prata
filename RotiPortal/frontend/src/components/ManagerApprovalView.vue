@@ -141,6 +141,15 @@ export default {
             // Hide the modal after submission
             this.commentModalVisible = false;
         },
+        viewRequest(request_id) {
+            axios.get(`http://localhost:5000/wfh_request/${request_id}`)
+            .then(response => {
+                this.selectedRequest = response.data
+            })
+            .catch(error => {
+                console.log(error)
+            })
+        },
         approveRequest(requestId, comment) {
             const payload = {
                 status: 'Approved',
