@@ -111,13 +111,86 @@ export default {
     },
     },
     methods: {
-        approveRequest(request_id) {
-            // Logic to approve request
-            console.log('Approving request:', request_id)
+        openCommentModal(actionType, requestId) {
+            console.log(requestId)
+            this.actionType = actionType; // Set the action type (approve or reject)
+            this.requestId = requestId;   // Set the request ID
+            this.comment = '';             // Reset comment input
+            this.commentModalVisible = true; // Show the modal
+            this.viewRequest(requestId);
         },
-        rejectRequest(request_id) {
-            // Logic to reject request
-            console.log('Rejecting request:', request_id)
+        submitComment() {
+            // Find the index of the request by requestId
+            const index = this.employee_requests.findIndex(request => request.request_id === this.requestId);
+
+            if (index !== -1) {
+                // Optimistically update the local status
+                const newStatus = this.actionType === 'approve' ? 'Approved' : 'Rejected';
+                this.employee_requests[index].status = newStatus;  // Update the status directly
+
+                // Submit the comment and status update
+                if (this.actionType === 'approve') {
+                    this.approveRequest(this.requestId, this.comment);
+                    window.alert('Request approved successfully!')
+                } else if (this.actionType === 'reject') {
+                    this.rejectRequest(this.requestId, this.comment);
+                    window.alert('Request rejected successfully!')
+                }
+            }
+
+            // Hide the modal after submission
+            this.commentModalVisible = false;
+        },
+        approveRequest(requestId, comment) {
+            const payload = {
+                status: 'Approved',
+                comment: comment
+            };
+
+            // Make the API call to update the status in the backend
+            axios.put(`http://localhost:5000/wfh_request/${requestId}`, payload)
+                .then(() => {  
+                })
+                .catch(error => {
+                    console.error('Error updating request:', error);
+                    window.alert('Failed to approve request. Please try again.');
+                    
+                    // Optionally revert the optimistic update in case of an error
+                    const index = this.employee_requests.findIndex(request => request.request_id === requestId);
+                    if (index !== -1) {
+                        this.employee_requests[index].status = 'Pending';  // Revert to pending
+                    }
+                });
+        },
+        rejectRequest(requestId, comment) {
+            const payload = {
+                status: 'Rejected', // Change the status to Rejected
+                comment: comment    // Add the comment
+            };
+
+            // Find the index of the request in your local data
+            const index = this.employee_requests.findIndex(request => request.request_id === requestId);
+
+            // Optimistically update the local state
+            if (index !== -1) {
+                this.employee_requests[index].status = 'Rejected'; // Update the status to Rejected
+                // Optional: Remove it from the list if you want to hide it immediately
+                // this.employee_requests.splice(index, 1); // Uncomment if you want to remove the item
+            }
+
+            // Send a PUT request to the server to update the request
+            axios.put(`http://localhost:5000/wfh_request/${requestId}`, payload)
+                .then(() => {
+                    console.log(`Request ${requestId} rejected with comment: ${comment}`);
+                })
+                .catch(error => {
+                    console.error('Error updating request:', error);
+                    window.alert('Failed to reject request. Please try again.');
+                    // If the request fails, revert the optimistic update
+                    if (index !== -1) {
+                        this.employee_requests[index].status = 'Pending'; // Revert to pending if needed
+                    }
+                });
         },
         getStaffName(staff_id) {
             for (const employee of this.employees) {
