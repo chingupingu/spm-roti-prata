@@ -84,6 +84,11 @@ export default {
             startDate: null,         // Initialize start date
             endDate: null,           // Initialize end date
             employee_requests: [],      // This will hold all employee requests
+            commentModalVisible: false, // Control visibility of the modal
+            actionType: '',             // To store whether it's 'approve' or 'reject'
+            requestId: null,            // Store the request ID for the selected action
+            comment: '',                // Store the comment input from the user
+            
         }
     },
     computed: {
