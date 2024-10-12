@@ -1,0 +1,290 @@
+<template>
+    <h2 class="mb-4">Manager Approval Dashboard</h2>
+        <!-- Filter Section -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <label for="statusFilter" class="form-label">Filter by Status:</label>
+                <select id="statusFilter" v-model="statusFilter" class="form-select">
+                    <option value="">All</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Approved">Approved</option>
+                    <option value="Rejected">Rejected</option>
+                </select>
+            </div>
+
+            <div class="col-md-6">
+                <label for="teamMemberFilter" class="form-label">Filter by Team Member:</label>
+                <input id="teamMemberFilter" v-model="teamMemberFilter" class="form-control" placeholder="Enter team member name">
+            </div>
+        </div>
+
+        <!-- Requests Table -->
+        <div class="card">
+            <h5 class="card-title">Requests</h5>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Employee</th>
+                                <th>Date</th>
+                                <th>Reason</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr 
+                                v-for="request in filteredEmployeeRequests" 
+                                :key="request.request_id" 
+                                :class="{'table-warning': request.status === 'Pending', 'table-success': request.status === 'Approved'}"
+                            >
+                                <td>{{ getStaffName(request.staff_id) }}</td>
+                                <td>{{ formatDateToDD_MMM_YYYY(request.date) }}</td>
+                                <td>{{ request.reason }}</td>
+                                <td>{{ request.status }}</td>
+                                <td>
+                                    <button 
+                                        @click="openCommentModal('approve', request.request_id)" 
+                                        class="btn btn-sm btn-success me-2" 
+                                        v-if="request.status === 'Pending'"
+                                    >
+                                        Approve
+                                    </button>
+                                    <button 
+                                        @click="openCommentModal('reject', request.request_id)" 
+                                        class="btn btn-sm btn-danger" 
+                                        v-if="request.status === 'Pending'"
+                                    >
+                                        Reject
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Comment Modal -->
+        <div v-if="commentModalVisible" class="custom-backdrop fade show"></div>
+        <div v-if="commentModalVisible" class="modal fade show" style="display: block;" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">{{ actionType === 'approve' ? 'Approve Request' : 'Reject Request' }}</h5>
+                        <button type="button" class="btn-close" @click="commentModalVisible = false"></button>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table table-striped">
+                            <tbody>
+                                <tr>
+                                    <th>Date:</th>
+                                    <td>{{ formatDateToDD_MMM_YYYY(selectedRequest.date) }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Shift:</th>
+                                    <td>{{ selectedRequest.shift }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Reason:</th>
+                                    <td>{{ selectedRequest.reason }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Attachments:</th>
+                                    <td>{{ selectedRequest.attachments }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <textarea v-model="comment" class="form-control" placeholder="Enter your comment for the above request..."></textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" @click="commentModalVisible = false">Cancel</button>
+                        <button type="button" class="btn btn-primary" @click="submitComment">Submit</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+</template>
+
+<script>
+import axios from 'axios'
+export default {
+    name: 'ManagerApprovalView',
+    data() {
+        return {
+            // general data
+            employee_obj: {},
+
+            // manager approval data
+            employees: [],
+            isLoading: true,
+            statusFilter: '',         // Initialize the status filter
+            teamMemberFilter: '',     // Initialize the team member filter
+            startDate: null,         // Initialize start date
+            endDate: null,           // Initialize end date
+            employee_requests: [],      // This will hold all employee requests
+            commentModalVisible: false, // Control visibility of the modal
+            actionType: '',             // To store whether it's 'approve' or 'reject'
+            requestId: null,            // Store the request ID for the selected action
+            comment: '',                // Store the comment input from the user
+            selectedRequest: {}
+        }
+    },
+    computed: {
+        filteredEmployeeRequests() {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); // Set to start of day for accurate comparison
+            const filtered = this.employee_requests.filter(request => {
+            const statusMatch = !this.statusFilter || request.status === this.statusFilter;
+            const teamMemberMatch = !this.teamMemberFilter || 
+                this.getStaffName(request.staff_id).toLowerCase().includes(this.teamMemberFilter.toLowerCase());
+            const dateMatch = new Date(request.date) >= today;
+            return statusMatch && teamMemberMatch && dateMatch;
+        });
+        // Sort requests: Pending at the top, then Approved, then Rejected
+        return filtered.sort((a, b) => {
+            const statusOrder = { 'Pending': 0, 'Approved': 1, 'Rejected': 2 };
+            if (statusOrder[a.status] !== statusOrder[b.status]) {
+                return statusOrder[a.status] - statusOrder[b.status];
+            }
+            // If status is the same, sort by date (earliest first)
+            return new Date(a.date) - new Date(b.date);
+        });
+    },
+    },
+    methods: {
+        openCommentModal(actionType, requestId) {
+            console.log(requestId)
+            this.actionType = actionType; // Set the action type (approve or reject)
+            this.requestId = requestId;   // Set the request ID
+            this.comment = '';             // Reset comment input
+            this.commentModalVisible = true; // Show the modal
+            this.viewRequest(requestId);
+        },
+        submitComment() {
+            // Find the index of the request by requestId
+            const index = this.employee_requests.findIndex(request => request.request_id === this.requestId);
+
+            if (index !== -1) {
+                // Optimistically update the local status
+                const newStatus = this.actionType === 'approve' ? 'Approved' : 'Rejected';
+                this.employee_requests[index].status = newStatus;  // Update the status directly
+
+                // Submit the comment and status update
+                if (this.actionType === 'approve') {
+                    this.approveRequest(this.requestId, this.comment);
+                    window.alert('Request approved successfully!')
+                    this.$forceUpdate()
+                } else if (this.actionType === 'reject') {
+                    this.rejectRequest(this.requestId, this.comment);
+                    window.alert('Request rejected successfully!')
+                    this.$forceUpdate()
+                }
+            }
+
+            // Hide the modal after submission
+            this.commentModalVisible = false;
+        },
+        viewRequest(request_id) {
+            axios.get(`http://localhost:5000/wfh_request/${request_id}`)
+            .then(response => {
+                this.selectedRequest = response.data
+            })
+            .catch(error => {
+                console.log(error)
+            })
+        },
+        approveRequest(requestId, comment) {
+            const payload = {
+                status: 'Approved',
+                comment: comment
+            };
+
+            // Make the API call to update the status in the backend
+            axios.put(`http://localhost:5000/wfh_request/${requestId}`, payload)
+                .then(() => {  
+                })
+                .catch(error => {
+                    console.error('Error updating request:', error);
+                    window.alert('Failed to approve request. Please try again.');
+                    
+                    // Optionally revert the optimistic update in case of an error
+                    const index = this.employee_requests.findIndex(request => request.request_id === requestId);
+                    if (index !== -1) {
+                        this.employee_requests[index].status = 'Pending';  // Revert to pending
+                    }
+                });
+        },
+        rejectRequest(requestId, comment) {
+            const payload = {
+                status: 'Rejected', // Change the status to Rejected
+                comment: comment    // Add the comment
+            };
+
+            // Find the index of the request in your local data
+            const index = this.employee_requests.findIndex(request => request.request_id === requestId);
+
+            // Optimistically update the local state
+            if (index !== -1) {
+                this.employee_requests[index].status = 'Rejected'; // Update the status to Rejected
+                // Optional: Remove it from the list if you want to hide it immediately
+                // this.employee_requests.splice(index, 1); // Uncomment if you want to remove the item
+            }
+
+            // Send a PUT request to the server to update the request
+            axios.put(`http://localhost:5000/wfh_request/${requestId}`, payload)
+                .then(() => {
+                    console.log(`Request ${requestId} rejected with comment: ${comment}`);
+                })
+                .catch(error => {
+                    console.error('Error updating request:', error);
+                    window.alert('Failed to reject request. Please try again.');
+                    // If the request fails, revert the optimistic update
+                    if (index !== -1) {
+                        this.employee_requests[index].status = 'Pending'; // Revert to pending if needed
+                    }
+                });
+        },
+        getStaffName(staff_id) {
+            for (const employee of this.employees) {
+                if (employee.Staff_ID == staff_id) {
+                    return employee.Staff_FName + " " + employee.Staff_LName
+                }
+            }
+        },
+        async fetchEmployeeData() {
+            axios.get(`http://localhost:5000/employee/manager/${this.employee_obj.Staff_ID}`)
+            .then(response => {
+                this.employees = response.data
+                this.fetchEmployeeRequests()
+            })
+            .catch(error => {
+                console.log(error)
+            })
+        },
+        async fetchEmployeeRequests() {
+            for (const employee of this.employees) {
+                axios.get(`http://localhost:5000/wfh_request/staff/${employee.Staff_ID}`)
+                .then(response => {
+                    this.employee_requests.push(...response.data)
+                })
+                .catch(error => {
+                    console.log(error)
+                })
+            }
+            console.log(this.pendingRequests)
+        },
+        formatDateToDD_MMM_YYYY(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+        }
+    },
+    mounted() {
+        this.employee_obj = JSON.parse(sessionStorage.getItem("employee_obj"))
+        this.fetchEmployeeData()
+    }
+}
+
+</script>
+
