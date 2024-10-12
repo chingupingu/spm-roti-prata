@@ -143,7 +143,6 @@ export default {
         WFHRequestView,
         ScheduleView,
         ManagerApprovalView,
-        VDatePicker: DatePicker,
         ScheduleView,
         TeamScheduleView
     },
