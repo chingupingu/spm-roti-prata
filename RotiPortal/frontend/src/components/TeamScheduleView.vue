@@ -147,7 +147,7 @@ const formattedDateForInput = ref(currentDate.value.toISOString().slice(0, 10))
 const statusColors = {
   'Work from Office': 'bg-blue-200',
   'Work from Home': 'bg-green-200',
-  'On Leave': 'bg-gray-200'
+  'On Leave': 'bg-gray-400'
 }
 
 const teamMembers = ref([])
@@ -179,68 +179,103 @@ onMounted(async () => {
 })
 
 const visibleDays = computed(() => {
-  const days = []
-  let start = new Date(currentDate.value)
-  let end = new Date(currentDate.value)
+  const days = [];
+  let start = new Date(currentDate.value);
+  let end = new Date(currentDate.value);
 
   if (currentView.value === 'Daily') {
     end.setDate(start.getDate() + 1);
   } else if (currentView.value === 'Weekly') {
-    start.setDate(start.getDate() - start.getDay()); // Set start to the Sunday of the current week
-    end = new Date(start); // Reset the end to start
-    end.setDate(start.getDate() + 7); // Set end to the Saturday of the same week
+    start.setDate(start.getDate() - start.getDay());
+    end = new Date(start);
+    end.setDate(start.getDate() + 7);
   }
 
   for (let d = new Date(start); d < end; d.setDate(d.getDate() + 1)) {
-    const dateString = d.toISOString().slice(0, 10); // Format to YYYY-MM-DD for comparison
+    const dateString = d.toISOString().split('T')[0];
+
     const dayStatus = selectedMembers.value.reduce((acc, member) => {
-      const memberData = schedule.value[member] || [];
-      const entry = memberData.find(e => e.Date.slice(0, 10) === dateString);
-      acc[member] = entry ? { AM: entry.Duration === 'AM' ? entry.Status : 'No Status', PM: entry.Duration === 'PM' ? entry.Status : 'No Status' } : { AM: 'No Status', PM: 'No Status' };
+      const entries = schedule.value[member]?.filter(entry => 
+        entry.Date.startsWith(dateString) && entry.Status === 'Approved'
+      ) || [];
+
+      // Default status assignment
+      acc[member] = { AM: 'No Status', PM: 'No Status' };
+
+      entries.forEach(entry => {
+        if (entry.Duration === 'FD') {
+          acc[member].AM = entry.Work_Arrangement; // Assign AM status
+          acc[member].PM = entry.Work_Arrangement; // Assign PM status
+        } else {
+          acc[member][entry.Duration] = entry.Work_Arrangement; // Assign status based on duration
+        }
+      });
+
       return acc;
     }, {});
-    
+
     days.push({
       date: new Date(d),
-      status: dayStatus
+      status: dayStatus,
     });
   }
 
-  return days
-})
+  return days;
+});
 
 const monthlyCalendar = computed(() => {
   const year = currentDate.value.getFullYear();
   const month = currentDate.value.getMonth();
   const firstDay = new Date(year, month, 1);
   const lastDay = new Date(year, month + 1, 0);
-  
+
   const days = [];
   const startPadding = firstDay.getDay();
   const endPadding = 6 - lastDay.getDay();
 
-  // Padding for previous month
+  // Add padding days from previous month
   for (let i = startPadding - 1; i >= 0; i--) {
-    days.push({ date: new Date(year, month, -i), isCurrentMonth: false, status: {} });
+    const d = new Date(Date.UTC(year, month, -i));
+    days.push({
+      date: d,
+      isCurrentMonth: false,
+      status: {},
+    });
   }
 
   // Current month days
   for (let d = 1; d <= lastDay.getDate(); d++) {
-    const date = new Date(year, month, d);
-    const dateString = date.toISOString().slice(0, 10);
-    const dayStatus = selectedMembers.value.reduce((acc, member) => {
-      const memberData = schedule.value[member] || [];
-      const entry = memberData.find(e => e.Date.slice(0, 10) === dateString);
-      acc[member] = entry ? { AM: entry.Duration === 'AM' ? entry.Status : 'No Status', PM: entry.Duration === 'PM' ? entry.Status : 'No Status' } : { AM: 'No Status', PM: 'No Status' };
-      return acc;
-    }, {});
+    const date = new Date(Date.UTC(year, month, d));
+    const dateString = date.toISOString().split('T')[0];
+    days.push({
+      date,
+      isCurrentMonth: true,
+      status: selectedMembers.value.reduce((acc, member) => {
+        const entries = schedule.value[member]?.filter(entry => entry.Date.startsWith(dateString)) || [];
+        acc[member] = { AM: 'No Status', PM: 'No Status' };
 
-    days.push({ date, isCurrentMonth: true, status: dayStatus });
+        entries.forEach(entry => {
+          if (entry.Duration === 'FD') {
+            acc[member].AM = entry.Work_Arrangement; // Assign AM status
+            acc[member].PM = entry.Work_Arrangement; // Assign PM status
+          } else {
+            acc[member][entry.Duration] = entry.Work_Arrangement; // Assign status based on duration
+          }
+        });
+
+        return acc;
+      }, {}),
+    });
   }
 
-  // Padding for next month
+  // Padding from next month
   for (let i = 1; i <= endPadding; i++) {
-    days.push({ date: new Date(year, month + 1, i), isCurrentMonth: false, status: {} });
+    const d = new Date(Date.UTC(year, month + 1, i));
+    days.push({
+      date: d,
+      isCurrentMonth: false,
+      status: {},
+    });
   }
 
   return days;
@@ -256,7 +291,7 @@ const formattedDate = computed(() => {
 
   if (currentView.value === 'Daily') {
     options.day = 'numeric'
-    return currentDate.value.toLocaleDateString('en-SG', options)
+    return currentDate.value.toLocaleDateString('en-US', options)
   }
 
   if (currentView.value === 'Weekly') {
@@ -266,14 +301,14 @@ const formattedDate = computed(() => {
     const endOfWeek = new Date(startOfWeek)  // Create endOfWeek after startOfWeek is finalized
     endOfWeek.setDate(startOfWeek.getDate() + 6)  // Set endOfWeek correctly
     
-    return `${startOfWeek.toLocaleDateString('en-SG', { month: 'long', day: 'numeric' })} - ${endOfWeek.toLocaleDateString('en-SG', { month: 'long', day: 'numeric' })}`
+    return `${startOfWeek.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })} - ${endOfWeek.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}`
   }
 
-  return currentDate.value.toLocaleDateString('en-SG', options)
+  return currentDate.value.toLocaleDateString('en-US', options)
 })
 
 const formatDay = (date) => {
-  return date.toLocaleDateString('en-SG', { weekday: 'short', month: 'short', day: 'numeric' })
+  return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
 }
 
 const changeDate = (delta) => {
@@ -290,13 +325,13 @@ const changeDate = (delta) => {
 }
 
 const getStatusClass = (day, member, period) => {
-  const status = day.status[member]?.[period]
-  return statusColors[status] || 'bg-gray-100'
-}
+  const status = day.status[member]?.[period];
+  return statusColors[status] || 'bg-gray-100';
+};
 
 const getStatusText = (day, member, period) => {
-  return day.status[member]?.[period] || 'No Status'
-}
+  return day.status[member]?.[period] || 'No Status';
+};
 
 const getDayBackgroundColor = (day) => {
   if (!day.isCurrentMonth) return 'bg-gray-100'
