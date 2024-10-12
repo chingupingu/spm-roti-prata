@@ -26,3 +26,6 @@ class ScheduleService:
 
     def get_all_schedules(self) -> list[Schedule]:
         return self.schedule_repository.get_all_schedules()
+
+    def get_schedules_and_employees_by_dept(self, dept: str) -> dict:
+        return self.schedule_repository.get_schedules_and_employees_by_dept(dept)

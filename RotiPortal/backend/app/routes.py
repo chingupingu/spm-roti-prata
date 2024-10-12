@@ -68,7 +68,6 @@ def register_routes(app):
         employee_service.delete_employee(staff_id)
         return '', 204
 
-
     @app.route('/employee/login', methods=['POST'])
     def check_email_exists():
         data = request.json
@@ -77,7 +76,7 @@ def register_routes(app):
             return jsonify({'error': 'Email is required'}), 400
         exists = employee_service.get_employee_by_email(email)
         return jsonify(exists)
-    
+
 
     ################################################################
     #                      WFH REQUESTS                            #
@@ -207,3 +206,12 @@ def register_routes(app):
     def get_all_schedules():
         schedules = schedule_service.get_all_schedules()
         return jsonify([schedule.__dict__ for schedule in schedules])
+
+    @app.route('/deptSchedule', methods=['GET'])
+    def get_schedules_by_dept():
+        user_dept = request.headers.get('Dept')
+        
+        # Fetch schedules for staff in the same department
+        schedules = schedule_service.get_schedules_and_employees_by_dept(user_dept)
+        
+        return jsonify(schedules)

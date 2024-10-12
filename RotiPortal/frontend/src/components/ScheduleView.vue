@@ -18,7 +18,7 @@
               <ChevronLeftIcon class="h-6 w-6" />
             </button>
             <span class="text-lg font-semibold">{{ formattedDate }}</span>
-  
+
             <div class="relative">
               <input 
                 type="date" 
@@ -31,7 +31,7 @@
                 <CalendarIcon class="h-6 w-6" />
               </button>
             </div>
-  
+
             <button @click="changeDate(1)" class="text-gray-600 hover:text-gray-800">
               <ChevronRightIcon class="h-6 w-6" />
             </button>
@@ -77,16 +77,20 @@
             </tbody>
           </table>
         </div>
-  
-        <div class="mt-6 flex justify-center space-x-4">
-          <!-- Iterate through each status category in statusColors -->
-          <div v-for="(subStatuses, status) in statusColors" :key="status">
-            <!-- Iterate through each sub-status and its color for the current status -->
-            <div v-for="(color, subStatus) in subStatuses" :key="subStatus" class="flex items-center">
-              <div :class="`w-4 h-4 rounded ${color} mr-2`"></div>
-              <span class="text-sm text-gray-600">{{ status }} {{ subStatus ? subStatus : '' }}</span>
-            </div>
-          </div>
+
+        <div class="mt-5 flex justify-center space-x-4">
+          <div :class="`w-4 h-4 rounded bg-blue-200 mr-2`"></div>
+          <span class="text-sm text-gray-600">Work from Office</span>
+          <div :class="`w-4 h-4 rounded bg-green-200 mr-2`"></div>
+          <span class="text-sm text-gray-600">Work from Home Approved</span>
+          <div :class="`w-4 h-4 rounded bg-orange-200 mr-2`"></div>
+          <span class="text-sm text-gray-600">Work from Home Pending</span>
+          <div :class="`w-4 h-4 rounded bg-red-200 mr-2`"></div>
+          <span class="text-sm text-gray-600">Work from Home Rejected</span>
+          <div :class="`w-4 h-4 rounded bg-gray-400 mr-2`"></div>
+          <span class="text-sm text-gray-600">On Leave</span>
+          <div :class="`w-4 h-4 rounded bg-gray-100 mr-2`"></div>
+          <span class="text-sm text-gray-600">No Status</span>
         </div>
       </div>
     </div>
@@ -95,6 +99,7 @@
   <script setup>
   import { ref, computed, onMounted } from 'vue'
   import { ChevronLeftIcon, ChevronRightIcon, CalendarIcon } from 'lucide-vue-next'
+  import { DatePicker } from 'v-calendar';
   import axios from 'axios'
   
   const views = ['Daily', 'Weekly', 'Monthly']
@@ -116,7 +121,7 @@
       'Rejected': 'bg-red-200',
     },
     'On Leave': {
-      'Approved': 'bg-gray-200',
+      'Approved': 'bg-gray-400',
     },
     'No Status': {
       'No Status': 'bg-gray-100',
@@ -163,14 +168,15 @@
     const days = []
     let start = new Date(currentDate.value)
     let end = new Date(currentDate.value)
-  
+
     if (currentView.value === 'Daily') {
-      end.setDate(start.getDate() + 1)
+      end.setDate(start.getDate() + 1);
     } else if (currentView.value === 'Weekly') {
-      start.setDate(start.getDate() - start.getDay())
-      end.setDate(start.getDate() + 7)
+      start.setDate(start.getDate() - start.getDay()); // Set start to the Sunday of the current week
+      end = new Date(start); // Reset the end to start
+      end.setDate(start.getDate() + 7); // Set end to the Saturday of the same week
     }
-  
+
     for (let d = new Date(start); d < end; d.setDate(d.getDate() + 1)) {
       const dateString = d.toDateString()
       days.push({
@@ -230,29 +236,30 @@
     const newDate = new Date(e.target.value)
     currentDate.value = newDate
   }
-  
+
   const formattedDate = computed(() => {
     const options = { year: 'numeric', month: 'long' }
   
     if (currentView.value === 'Daily') {
       options.day = 'numeric'
-      return currentDate.value.toLocaleDateString('en-US', options)
+      return currentDate.value.toLocaleDateString('en-SG', options)
     }
   
     if (currentView.value === 'Weekly') {
       const startOfWeek = new Date(currentDate.value)
-      const endOfWeek = new Date(startOfWeek)
-      startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay())
-      endOfWeek.setDate(startOfWeek.getDate() + 6)
-  
-      return `${startOfWeek.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })} - ${endOfWeek.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}`
+      startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay())  // Calculate startOfWeek first
+
+      const endOfWeek = new Date(startOfWeek)  // Create endOfWeek after startOfWeek is finalized
+      endOfWeek.setDate(startOfWeek.getDate() + 6)  // Set endOfWeek correctly
+      
+      return `${startOfWeek.toLocaleDateString('en-SG', { month: 'long', day: 'numeric' })} - ${endOfWeek.toLocaleDateString('en-SG', { month: 'long', day: 'numeric' })}`
     }
   
-    return currentDate.value.toLocaleDateString('en-US', options)
+    return currentDate.value.toLocaleDateString('en-SG', options)
   })
   
   const formatDay = (date) => {
-    return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
+    return date.toLocaleDateString('en-SG', { weekday: 'short', month: 'short', day: 'numeric' })
   }
   
   const changeDate = (delta) => {
@@ -279,4 +286,6 @@
     const status = day.status[period]?.status || 'No Status';
     return `${arrangement}`;
   };
+
+  defineExpose({ DatePicker });
   </script>

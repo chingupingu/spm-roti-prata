@@ -20,6 +20,11 @@
                     <a class="nav-link" :class="{ active: activeTab === 'schedule' }" href="#"
                         @click.prevent="activeTab = 'schedule'">Own Schedule</a>
                 </li>
+                <!-- team schedule -->
+                <li class="nav-item" v-if="role == 3">
+                    <a class="nav-link" :class="{ active: activeTab === 'teamSchedule' }" href="#"
+                        @click.prevent="activeTab = 'teamSchedule'">Team Schedule</a>
+                </li>
                 <!-- manager approval -->
                 <li class="nav-item" v-if="role == 3">
                     <a class="nav-link" :class="{ active: activeTab === 'manager' }" href="#"
@@ -35,11 +40,6 @@
                     <a class="nav-link" :class="{ active: activeTab === 'report' }" href="#"
                         @click.prevent="activeTab = 'report'">Management Report</a>
                 </li>
-                <!-- TESTING  -->
-                <li class="nav-item" v-if="role == 1">
-                    <a class="nav-link" :class="{ active: activeTab === 'testing' }" href="#"
-                        @click.prevent="activeTab = 'testing'">TESTING</a>
-                </li>
             </ul>
         </div>
 
@@ -52,9 +52,17 @@
         
         <!-- Own Schedule -->
         <div v-if="activeTab === 'schedule'" class="own-schedule">
-            <div class="row align-items-start" style="margin-top: 150px;">
-                <h2>Own Schedule</h2>
+            <div class="row align-items-start" style="margin-top: 120px;">
+                <h2 class="mb-4">Own Schedule</h2>
                 <ScheduleView />
+            </div>
+        </div>
+
+        <!-- Manager View Team Schedule Dashboard -->
+        <div v-if="activeTab === 'teamSchedule'" class="team-schedule">
+            <div class="row align-items-start" style="margin-top: 160px;">
+                <h2 class="mb-4">Team Schedule</h2>
+                <TeamScheduleView />
             </div>
         </div>
 
@@ -62,37 +70,6 @@
         <div v-if="activeTab === 'manager'" class="manager-dashboard">
             <div class="row align-items-start justify-content-center" style="margin-top: 150px;">
                 <ManagerApprovalView />
-            </div>
-        </div>
-
-        <!-- TESTING -->
-        <div v-if="activeTab === 'testing'" class="testing-dashboard">
-            <div class="row align-items-start" style="margin-top: 155px;">
-                <h2 class="mb-4">TESTING</h2>
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Pending Requests</h5>
-                        <div class="table-responsive">
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>Employee</th>
-                                        <th>Type</th>
-                                        <th>Date</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr v-for="(employee, index) in employees" :key="employee.Staff_ID">
-                                        <td>{{ employee.Email }}</td>
-                                        <td>{{ employee.Country }}</td>
-                                        <td>{{ employee.Position }}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
 
@@ -157,13 +134,18 @@
 <script>
 import axios from 'axios';
 import ScheduleView from '../components/ScheduleView.vue';
+import TeamScheduleView from '../components/TeamScheduleView.vue';
 import WFHRequestView from '../components/WFHRequestView.vue';
 import ManagerApprovalView from '../components/ManagerApprovalView.vue';
+
 export default {
     components: {
         WFHRequestView,
         ScheduleView,
-        ManagerApprovalView
+        ManagerApprovalView,
+        VDatePicker: DatePicker,
+        ScheduleView,
+        TeamScheduleView
     },
     data() {
         return {
@@ -195,11 +177,10 @@ export default {
 </script>
 
 <style scoped>
-/* Add any component-specific styles here */
-
 /* Adjust card max-height for better visibility */
 .card {
     max-height: calc(100vh - 250px);
     overflow-y: auto;
+    scrollbar-width: none;
 }
 </style>
