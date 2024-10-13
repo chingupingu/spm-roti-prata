@@ -66,14 +66,21 @@
                         <ul class="list-group">
                             <li v-for="request in sortedYourRequests" :key="request.request_id"
                                 class="list-group-item d-flex justify-content-between align-items-center">
-                                {{ formatDateToDD_MMM_YYYY(request.date) }} - {{ request.shift === 'FD' ? 'Full Day' : request.shift }}
-                                <div class="col">
-                                    
+                                <div class="col-4">
+                                    {{ formatDateToDD_MMM_YYYY(request.date) }} - {{ request.shift === 'FD' ? 'Full Day' : request.shift }}
                                 </div>
-                                <span
-                                    :class="['badge', request.status === 'Approved' ? 'bg-success' : 'bg-warning']">{{
-                                    request.status }}</span>
-                                <button class="btn btn-primary ms-4" data-bs-toggle="modal" data-bs-target="#requestModal" @click="viewRequest(request.request_id)">View</button>
+                                <div class="col-4">
+                                    <span
+                                        :class="['badge', request.status === 'Approved' ? 'bg-success' : request.status === 'Rejected' ? 'bg-danger' : 'bg-warning']">
+                                        {{ request.status }}
+                                    </span>
+                                </div>
+                                <div class="col-2">
+                                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#requestModal" @click="viewRequest(request.request_id)">View</button>
+                                </div>
+                                <div class="col-2">
+                                    <button v-if="request.status === 'Approved'" class="btn btn-secondary ms-2" data-bs-toggle="modal" data-bs-target="#withdrawModal" @click="withdrawRequest(request.request_id)">Withdraw</button>
+                                </div>
                             </li>
                         </ul>
                     </div>
@@ -123,6 +130,49 @@
             </div>
         </div>
     </div>
+
+    <!-- Withdrawal Request Modal -->
+    <div id="withdrawModal" class="modal fade" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Withdraw Request</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-striped">
+                        <tbody>
+                            <tr>
+                                <th>Date:</th>
+                                <td>{{ formatDateToDD_MMM_YYYY(selectedRequest.date) }}</td>
+                            </tr>
+                            <tr>
+                                <th>Shift:</th>
+                                <td>{{ selectedRequest.shift }}</td>
+                            </tr>
+                            <tr>
+                                <th>Reason:</th>
+                                <td>{{ selectedRequest.reason }}</td>
+                            </tr>
+                            <tr>
+                                <th>Status:</th>
+                                <td>{{ selectedRequest.status }}</td>
+                            </tr>
+                            <tr>
+                                <th>Attachments:</th>
+                                <td>{{ selectedRequest.attachment_url }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p><strong>Are you sure you want to withdraw this request?</strong></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" @click="submitWithdrawalRequest" data-bs-dismiss="modal">Withdraw</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </template>
 
 <script>
@@ -154,10 +204,11 @@ export default {
         sortedYourRequests() {
         const today = new Date();
         today.setHours(0, 0, 0, 0); // Set to start of day for accurate comparison
+        
         return [...this.your_requests]
-            .filter(request => new Date(request.date) >= today)
+            .filter(request => new Date(request.date) >= today && request.status !== 'Withdrawn') // Exclude withdrawn requests
             .sort((a, b) => new Date(a.date) - new Date(b.date));
-        }
+    }
     },
     methods: {
         getStaffName(staff_id) {
@@ -228,6 +279,60 @@ export default {
         formatDateToDD_MMM_YYYY(dateString) {
             const date = new Date(dateString);
             return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+        }, 
+        // Method to withdraw a request
+        withdrawRequest(requestId) {
+            this.selectedRequestId = requestId; // Store the request ID for withdrawal
+            axios.get(`http://localhost:5000/wfh_request/${requestId}`)
+            .then(response => {
+                this.selectedRequest = response.data
+            })
+            .catch(error => {
+                console.log(error)
+            })
+        },
+
+        // Submit the withdrawal request
+        submitWithdrawalRequest() {
+            const payload = {
+                status: 'Withdrawn', // Change the status to Withdrawn
+            };
+
+            // Update the request status on the server
+            axios.put(`http://localhost:5000/wfh_request/${this.selectedRequestId}`, payload)
+                .then(() => {
+                    // Update local state to reflect withdrawal
+                    const index = this.your_requests.findIndex(request => request.request_id === this.selectedRequestId);
+                    if (index !== -1) {
+                        this.your_requests[index].status = 'Withdrawn'; // Update local status
+                    }
+                    window.alert('Request withdrawn successfully!');
+                })
+                .catch(error => {
+                    console.error('Error withdrawing request:', error);
+                    window.alert('Failed to withdraw request. Please try again.');
+                });
+        },
+        confirmWithdrawal(requestId){
+            console.log('byeeee')
+            const payload = {
+                status: 'Withdrawn'
+            };
+
+            // Make the API call to update the status in the backend
+            axios.put(`http://localhost:5000/wfh_request/${requestId}`, payload)
+                .then(() => {  
+                })
+                .catch(error => {
+                    console.error('Error updating request:', error);
+                    window.alert('Failed to approve request. Please try again.');
+                    
+                    // Optionally revert the optimistic update in case of an error
+                    const index = this.your_requests.findIndex(request => request.request_id === requestId);
+                    if (index !== -1) {
+                        this.your_requests[index].status = 'Approved';  // Revert to approved
+                    }
+                });
         }
     },
     mounted() {
