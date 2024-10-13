@@ -18,93 +18,99 @@
             </div>
         </div>
 
-        <!-- Requests Table -->
-        <div class="card">
-            <h5 class="card-title">Requests</h5>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Employee</th>
-                                <th>Date</th>
-                                <th>Reason</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
+    <!-- Requests Table -->
+    <div class="card">
+        <h5 class="card-title">Requests</h5>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Employee</th>
+                            <th>Date</th>
+                            <th>Reason</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr 
+                            v-for="request in filteredEmployeeRequests" 
+                            :key="request.request_id" 
+                            :class="{
+                                'table-warning': request.status === 'Pending', 
+                                'table-success': request.status === 'Approved', 
+                                'table-danger': request.status === 'Rejected',
+                                'table-secondary': request.status === 'Withdrawn'
+                            }"
+                        >
+                            <td>{{ getStaffName(request.staff_id) }}</td>
+                            <td>{{ formatDateToDD_MMM_YYYY(request.date) }}</td>
+                            <td>{{ request.reason }}</td>
+                            <td>{{ request.status }}</td>
+                            <td>
+                                <button 
+                                    @click="openCommentModal('approve', request.request_id)" 
+                                    class="btn btn-sm btn-success me-2" 
+                                    v-if="request.status === 'Pending'"
+                                    data-bs-toggle="modal" data-bs-target="#commentModal"
+                                >
+                                    Approve
+                                </button>
+                                <button 
+                                    @click="openCommentModal('reject', request.request_id)" 
+                                    class="btn btn-sm btn-danger" 
+                                    v-if="request.status === 'Pending'"
+                                    data-bs-toggle="modal" data-bs-target="#commentModal"
+                                >
+                                    Reject
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Comment Modal -->
+    <div id="commentModal" class="modal fade" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">{{ actionType === 'approve' ? 'Approve Request' : 'Reject Request' }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-striped">
                         <tbody>
-                            <tr 
-                                v-for="request in filteredEmployeeRequests" 
-                                :key="request.request_id" 
-                                :class="{'table-warning': request.status === 'Pending', 'table-success': request.status === 'Approved'}"
-                            >
-                                <td>{{ getStaffName(request.staff_id) }}</td>
-                                <td>{{ formatDateToDD_MMM_YYYY(request.date) }}</td>
-                                <td>{{ request.reason }}</td>
-                                <td>{{ request.status }}</td>
-                                <td>
-                                    <button 
-                                        @click="openCommentModal('approve', request.request_id)" 
-                                        class="btn btn-sm btn-success me-2" 
-                                        v-if="request.status === 'Pending'"
-                                    >
-                                        Approve
-                                    </button>
-                                    <button 
-                                        @click="openCommentModal('reject', request.request_id)" 
-                                        class="btn btn-sm btn-danger" 
-                                        v-if="request.status === 'Pending'"
-                                    >
-                                        Reject
-                                    </button>
-                                </td>
+                            <tr>
+                                <th>Date:</th>
+                                <td>{{ formatDateToDD_MMM_YYYY(selectedRequest.date) }}</td>
+                            </tr>
+                            <tr>
+                                <th>Shift:</th>
+                                <td>{{ selectedRequest.shift }}</td>
+                            </tr>
+                            <tr>
+                                <th>Reason:</th>
+                                <td>{{ selectedRequest.reason }}</td>
+                            </tr>
+                            <tr>
+                                <th>Attachments:</th>
+                                <td>{{ selectedRequest.attachments }}</td>
                             </tr>
                         </tbody>
                     </table>
+                    <textarea v-model="comment" class="form-control" placeholder="Enter your comment for the above request..."></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" @click="submitComment" data-bs-dismiss="modal">Submit</button>
                 </div>
             </div>
         </div>
-
-        <!-- Comment Modal -->
-        <div v-if="commentModalVisible" class="custom-backdrop fade show"></div>
-        <div v-if="commentModalVisible" class="modal fade show" style="display: block;" tabindex="-1">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">{{ actionType === 'approve' ? 'Approve Request' : 'Reject Request' }}</h5>
-                        <button type="button" class="btn-close" @click="commentModalVisible = false"></button>
-                    </div>
-                    <div class="modal-body">
-                        <table class="table table-striped">
-                            <tbody>
-                                <tr>
-                                    <th>Date:</th>
-                                    <td>{{ formatDateToDD_MMM_YYYY(selectedRequest.date) }}</td>
-                                </tr>
-                                <tr>
-                                    <th>Shift:</th>
-                                    <td>{{ selectedRequest.shift }}</td>
-                                </tr>
-                                <tr>
-                                    <th>Reason:</th>
-                                    <td>{{ selectedRequest.reason }}</td>
-                                </tr>
-                                <tr>
-                                    <th>Attachments:</th>
-                                    <td>{{ selectedRequest.attachments }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <textarea v-model="comment" class="form-control" placeholder="Enter your comment for the above request..."></textarea>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" @click="commentModalVisible = false">Cancel</button>
-                        <button type="button" class="btn btn-primary" @click="submitComment">Submit</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+    </div>
 </template>
 
 <script>
@@ -134,24 +140,45 @@ export default {
     computed: {
         filteredEmployeeRequests() {
             const today = new Date();
-            today.setHours(0, 0, 0, 0); // Set to start of day for accurate comparison
+            today.setHours(0, 0, 0, 0); // Set to the start of the day for accurate comparison
+
+            const isWithin24Hours = (requestDate) => {
+                let approvalDate = new Date(requestDate);
+                approvalDate.setDate(approvalDate.getDate() - 1); // 24 hours before the request date
+                
+                let daysToSubtract = 0;
+                // Adjust for weekends (skip Saturday and Sunday)
+                if (approvalDate.getDay() === 0) { // Sunday
+                    daysToSubtract = 2;
+                } else if (approvalDate.getDay() === 6) { // Saturday
+                    daysToSubtract = 1;
+                }
+                approvalDate.setDate(approvalDate.getDate() - daysToSubtract);
+
+                return today > approvalDate; // Can only approve/reject if today is greater than the adjusted approval date
+            };
+
             const filtered = this.employee_requests.filter(request => {
-            const statusMatch = !this.statusFilter || request.status === this.statusFilter;
-            const teamMemberMatch = !this.teamMemberFilter || 
-                this.getStaffName(request.staff_id).toLowerCase().includes(this.teamMemberFilter.toLowerCase());
-            const dateMatch = new Date(request.date) >= today;
-            return statusMatch && teamMemberMatch && dateMatch;
-        });
-        // Sort requests: Pending at the top, then Approved, then Rejected
-        return filtered.sort((a, b) => {
-            const statusOrder = { 'Pending': 0, 'Approved': 1, 'Rejected': 2 };
-            if (statusOrder[a.status] !== statusOrder[b.status]) {
-                return statusOrder[a.status] - statusOrder[b.status];
-            }
-            // If status is the same, sort by date (earliest first)
-            return new Date(a.date) - new Date(b.date);
-        });
-    },
+                const statusMatch = !this.statusFilter || request.status === this.statusFilter;
+                const teamMemberMatch = !this.teamMemberFilter ||
+                    this.getStaffName(request.staff_id).toLowerCase().includes(this.teamMemberFilter.toLowerCase());
+                
+                const requestDate = new Date(request.date);
+                const dateMatch = !isWithin24Hours(requestDate); // Ensure it's not within 24 hours considering the work week
+
+                return statusMatch && teamMemberMatch && dateMatch;
+            });
+
+            // Sort requests: Pending at the top, then Approved, then Rejected
+            return filtered.sort((a, b) => {
+                const statusOrder = { 'Pending': 0, 'Approved': 1, 'Rejected': 2 };
+                if (statusOrder[a.status] !== statusOrder[b.status]) {
+                    return statusOrder[a.status] - statusOrder[b.status];
+                }
+                // If status is the same, sort by date (earliest first)
+                return new Date(a.date) - new Date(b.date);
+            });
+        },
     },
     methods: {
         openCommentModal(actionType, requestId) {
@@ -288,3 +315,18 @@ export default {
 
 </script>
 
+<style scoped>
+/* Add any component-specific styles here */
+.table-warning {
+    background-color: #fff3cd; /* Light yellow for pending requests */
+}
+.table-success {
+    background-color: #d4edda; /* Light green for approved requests */
+}
+.table-danger {
+    background-color: #f8d7da; /* Light red for rejected requests */
+}
+.table-secondary {
+    background-color: #e2e3e5; /* Light grey for withdrawn requests */
+}
+</style>
