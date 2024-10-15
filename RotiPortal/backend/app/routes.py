@@ -88,6 +88,17 @@ def register_routes(app):
         date = data.get("date")
         valid, message = wfh_request_service.validate_wfh_request(staff_id, date)
         return jsonify({"valid": valid, "message": message})
+    
+    @app.route("/wfh_request_alert", methods=["POST"])
+    def alert_supervisor():
+        data = request.json
+        staff_id = data.get("staff_id")
+        reason = data.get("reason")
+        date = data.get("date")    
+        shift = data.get("shift")
+        wfh_request_service.alert_supervisor(staff_id, date, shift, reason)
+        return jsonify({"message": "Supervisor alerted successfully."}), 200
+
 
     @app.route("/wfh_request", methods=["POST"])
     def create_wfh_request():

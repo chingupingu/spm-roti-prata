@@ -220,7 +220,7 @@ export default {
         },
         validateWfhRequest() {
             // Logic to validate WFH request
-            axios.post("http://localhost:5000/wfh_request/validate", this.wfhRequest)
+            axios.post("http://127.0.0.1:5000/wfh_request/validate", this.wfhRequest)
             .then(response => {
                 if (response.data.valid) {
                     this.submitWfhRequest()
@@ -235,11 +235,12 @@ export default {
         },
         submitWfhRequest() {
             // Logic to submit WFH request
-            axios.post("http://localhost:5000/wfh_request", this.wfhRequest)
+            axios.post("http://127.0.0.1:5000/wfh_request", this.wfhRequest)
             .then(response => {
                 console.log(response.data)
                 if (response.status == 201) {
                     window.alert('Request submitted successfully!')
+                    this.alertSupervisor()
                     // Reset form after submission
                     this.wfhRequest = {
                         staff_id: this.employee_obj.Staff_ID,
@@ -258,8 +259,20 @@ export default {
                 window.alert(error.response.data.error)
             })
         },
+        alertSupervisor() {
+            axios.post("http://127.0.0.1:5000/wfh_request_alert", this.wfhRequest)
+            .then(response => {
+                console.log(response.data)
+                if (response.status == 201) {
+                    window.alert('Request submitted successfully!')
+                }
+            })
+            .catch(error => {
+                window.alert(error.response.data.error)
+            })
+        },
         populateWfhRequests() {
-            axios.get(`http://localhost:5000/wfh_request/staff/${this.employee_obj.Staff_ID}`)
+            axios.get(`http://127.0.0.1:5000/wfh_request/staff/${this.employee_obj.Staff_ID}`)
             .then(response => {
                 this.your_requests = response.data
             })
@@ -268,7 +281,7 @@ export default {
             })
         },
         viewRequest(request_id) {
-            axios.get(`http://localhost:5000/wfh_request/${request_id}`)
+            axios.get(`http://127.0.0.1:5000/wfh_request/${request_id}`)
             .then(response => {
                 this.selectedRequest = response.data
             })
@@ -283,7 +296,7 @@ export default {
         // Method to withdraw a request
         withdrawRequest(requestId) {
             this.selectedRequestId = requestId; // Store the request ID for withdrawal
-            axios.get(`http://localhost:5000/wfh_request/${requestId}`)
+            axios.get(`http://127.0.0.1:5000/wfh_request/${requestId}`)
             .then(response => {
                 this.selectedRequest = response.data
             })
@@ -299,7 +312,7 @@ export default {
             };
 
             // Update the request status on the server
-            axios.put(`http://localhost:5000/wfh_request/${this.selectedRequestId}`, payload)
+            axios.put(`http://127.0.0.1:5000/wfh_request/${this.selectedRequestId}`, payload)
                 .then(() => {
                     // Update local state to reflect withdrawal
                     const index = this.your_requests.findIndex(request => request.request_id === this.selectedRequestId);
@@ -320,7 +333,7 @@ export default {
             };
 
             // Make the API call to update the status in the backend
-            axios.put(`http://localhost:5000/wfh_request/${requestId}`, payload)
+            axios.put(`http://127.0.0.1:5000/wfh_request/${requestId}`, payload)
                 .then(() => {  
                 })
                 .catch(error => {

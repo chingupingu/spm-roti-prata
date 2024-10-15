@@ -2,10 +2,12 @@ from ..repositories.wfh_request_repository import WfhRequestRepository
 from ..models import WfhRequest
 from firebase_admin import storage
 from datetime import datetime, timedelta
+from ..services.employee_service import EmployeeService
 
 class WfhRequestService:
     def __init__(self):
         self.wfh_request_repository = WfhRequestRepository()
+        self.employee_service = EmployeeService()
 
     def create_wfh_request(self, staff_id: str, date: str, shift: str, reason: str, recurring: bool, attachment_file, status: str) -> str:
         if attachment_file:
@@ -68,6 +70,73 @@ class WfhRequestService:
         # If we've passed all checks, the request is valid
         return (True, "")
 
+    def alert_supervisor(self, staff_id: str, date: str, shift: str, reason: str) -> None:
+        import pytz
+
+        employee_object = self.employee_service.get_employee(staff_id)
+        employee_name = employee_object.Staff_FName + " " + employee_object.Staff_LName
+        reporting_manager_id = employee_object.Reporting_Manager
+        reporting_manager_object = self.employee_service.get_employee(reporting_manager_id)
+        reporting_manager_name = reporting_manager_object.Staff_FName + " " + reporting_manager_object.Staff_LName
+
+        # Original ISO 8601 date string
+        iso_date = date
+
+        # Convert to a datetime object in UTC
+        dt_utc = datetime.fromisoformat(iso_date[:-1])  # Remove the 'Z' for compatibility
+        dt_utc = dt_utc.replace(tzinfo=pytz.utc)  # Set timezone to UTC
+
+        # Convert to Singapore timezone
+        singapore_tz = pytz.timezone('Asia/Singapore')
+        dt_singapore = dt_utc.astimezone(singapore_tz)
+
+        # Format to dd-mm-yyyy
+        formatted_date = dt_singapore.strftime("%d-%m-%Y")
+
+        if shift == "FD":
+            shift = "Full Day"
+        
+
+        message = f"""Subject: New WFH Request from {employee_name}
+
+Hi {reporting_manager_name},
+
+    This email is to inform you of a new work-from-home request submitted by {employee_name}.
+
+    Request Details:
+    - Date to WFH: {formatted_date}
+    - Shift: {shift}
+    - Reason: {reason}
+
+    Please review and respond accordingly.
+
+Thank you,
+WFH System"""
+        self.send_email("seahxuanhui@gmail.com", message)
+
+    def send_email(self, to_email: str, message: str) -> None:
+        import smtplib
+        from getpass import getpass
+
+        HOST = "smtp.gmail.com"
+        PORT = 587
+        FROM_EMAIL = "rotiprataspm1@gmail.com"
+        PASSWORD = "salt noay zipe psuv"  # Use a more secure way to handle passwords
+
+        smtp = smtplib.SMTP(HOST, PORT)
+
+        status_code, response = smtp.ehlo()
+        print(f"[*] Echoing the server: {status_code} {response}")
+
+        status_code, response = smtp.starttls()
+        print(f"[*] Starting TLS connection: {status_code} {response}")
+
+        status_code, response = smtp.login(FROM_EMAIL, PASSWORD)
+        print(f"[*] Logging in: {status_code} {response}")
+
+        smtp.sendmail(FROM_EMAIL, to_email, message)
+        smtp.quit()
+    
 
     def get_wfh_request(self, request_id: str) -> WfhRequest:
         return self.wfh_request_repository.get_wfh_request(request_id)
