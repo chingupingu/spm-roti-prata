@@ -183,6 +183,10 @@ export default {
     methods: {
         openCommentModal(actionType, requestId) {
             console.log(requestId)
+            // console.log(this.getStaffIdFromRequest(requestId))
+            // console.log(this.startDate)
+            // console.log(this.endDate)
+            // console.log(actionType)
             this.actionType = actionType; // Set the action type (approve or reject)
             this.requestId = requestId;   // Set the request ID
             this.comment = '';             // Reset comment input
@@ -192,20 +196,30 @@ export default {
         submitComment() {
             // Find the index of the request by requestId
             const index = this.employee_requests.findIndex(request => request.request_id === this.requestId);
-
+            
             if (index !== -1) {
                 // Optimistically update the local status
                 const newStatus = this.actionType === 'approve' ? 'Approved' : 'Rejected';
                 this.employee_requests[index].status = newStatus;  // Update the status directly
+                const staffID = this.employee_requests[index].staff_id
+                // const startDate = this.startDate
+                // const endDate = this.endDate
+                const date = this.employee_requests[index].date
+                const shift = this.employee_requests[index].shift
+                const actionType = this.actionType
 
                 // Submit the comment and status update
                 if (this.actionType === 'approve') {
                     this.approveRequest(this.requestId, this.comment);
                     window.alert('Request approved successfully!')
+                    // this.alertStaff(staffID, startDate, endDate, shift, actionType)
+                    this.alertStaff(staffID, date, shift, actionType)
                     this.$forceUpdate()
                 } else if (this.actionType === 'reject') {
                     this.rejectRequest(this.requestId, this.comment);
                     window.alert('Request rejected successfully!')
+                    // this.alertStaff(staffID, startDate, endDate, shift, actionType)
+                    this.alertStaff(staffID, date, shift, actionType)
                     this.$forceUpdate()
                 }
             }
@@ -273,6 +287,43 @@ export default {
                     }
                 });
         },
+
+        alertStaff(staffID, date, shift, actionType) {
+        // alertStaff(staffID, startDate, endDate, actionType) {
+            const payload = {
+            staffID: staffID,
+            // startDate: startDate,  // Start date for the alert
+            // endDate: endDate,      // End date for the alert
+            date: date,
+            shift: shift,
+            actionType: actionType  // Action type (approve or reject)
+            }
+
+            axios.post("http://127.0.0.1:5000/wfh_request_update_alert", payload)
+            .then(response => {
+                console.log(response.data)
+                if (response.status == 201) {
+                    window.alert('Request submitted successfully!')
+                }
+            })
+            .catch(error => {
+                window.alert(error.response.data.error)
+            })
+        },
+
+        getStaffIdFromRequest(requestId) {
+            // Find the request object using the requestId
+            const request = this.employee_requests.find(req => req.request_id === requestId);
+
+            // Check if the request exists and return the staff ID
+            if (request) {
+                return request.staff_id; // Adjust this based on the actual field name
+            } else {
+                console.error('Request not found');
+                return null; // Or handle it as needed
+            }
+        },
+
         getStaffName(staff_id) {
             for (const employee of this.employees) {
                 if (employee.Staff_ID == staff_id) {
