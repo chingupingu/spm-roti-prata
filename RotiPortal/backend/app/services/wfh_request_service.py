@@ -112,7 +112,7 @@ Hi {reporting_manager_name},
 
 Thank you,
 WFH System"""
-        self.send_email("seahxuanhui@gmail.com", message)
+        self.send_email("innocentstriker1@gmail.com", message)
 
     def send_email(self, to_email: str, message: str) -> None:
         import smtplib
@@ -137,6 +137,76 @@ WFH System"""
         smtp.sendmail(FROM_EMAIL, to_email, message)
         smtp.quit()
     
+
+
+    # def alert_staff(self, staffID: str, startDate: str, endDate: str, actionType: str) -> None:
+    def alert_staff(self, staffID: str, date: str, shift: str, actionType: str) -> None:
+
+        import pytz
+
+        employee_object = self.employee_service.get_employee(staffID)
+        employee_name = employee_object.Staff_FName + " " + employee_object.Staff_LName
+        reporting_manager_id = employee_object.Reporting_Manager
+        reporting_manager_object = self.employee_service.get_employee(reporting_manager_id)
+        reporting_manager_name = reporting_manager_object.Staff_FName + " " + reporting_manager_object.Staff_LName
+        
+        if actionType == "approve":
+            actionType = "approved"
+        else:
+            actionType = "rejected"
+
+        # Original ISO 8601 date string
+        iso_date = date
+
+        # Convert to a datetime object in UTC
+        dt_utc = datetime.fromisoformat(iso_date[:-1])  # Remove the 'Z' for compatibility
+        dt_utc = dt_utc.replace(tzinfo=pytz.utc)  # Set timezone to UTC
+
+        # Convert to Singapore timezone
+        singapore_tz = pytz.timezone('Asia/Singapore')
+        dt_singapore = dt_utc.astimezone(singapore_tz)
+
+        # Format to dd-mm-yyyy
+        formatted_date = dt_singapore.strftime("%d-%m-%Y")
+
+        if shift == "FD":
+            shift = "Full Day"
+        
+
+        message = f"""Subject: WFH Request {actionType}
+
+Hi {employee_name},
+
+    This email is to inform you that your WFH request for {formatted_date} for {shift} shift has been {actionType} by {reporting_manager_name}.
+
+
+Thank you,
+WFH System"""
+        self.send_email("innocentstriker1@gmail.com", message)
+
+    def send_email(self, to_email: str, message: str) -> None:
+        import smtplib
+        from getpass import getpass
+
+        HOST = "smtp.gmail.com"
+        PORT = 587
+        FROM_EMAIL = "rotiprataspm1@gmail.com"
+        PASSWORD = "salt noay zipe psuv"  # Use a more secure way to handle passwords
+
+        smtp = smtplib.SMTP(HOST, PORT)
+
+        status_code, response = smtp.ehlo()
+        print(f"[*] Echoing the server: {status_code} {response}")
+
+        status_code, response = smtp.starttls()
+        print(f"[*] Starting TLS connection: {status_code} {response}")
+
+        status_code, response = smtp.login(FROM_EMAIL, PASSWORD)
+        print(f"[*] Logging in: {status_code} {response}")
+
+        smtp.sendmail(FROM_EMAIL, to_email, message)
+        smtp.quit()
+
 
     def get_wfh_request(self, request_id: str) -> WfhRequest:
         return self.wfh_request_repository.get_wfh_request(request_id)

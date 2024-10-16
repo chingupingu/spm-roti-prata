@@ -97,6 +97,20 @@ def register_routes(app):
         wfh_request_service.alert_supervisor(staff_id, date, shift, reason)
         return jsonify({"message": "Supervisor alerted successfully."}), 200
 
+    @app.route("/wfh_request_update_alert", methods=["POST"])
+    def alert_staff():
+        data = request.json
+        staffID = data.get("staffID")
+        # startDate = data.get("startDate")
+        # endDate = data.get("endDate")
+        date = data.get('date')
+        shift = data.get('shift')
+        actionType = data.get("actionType")
+        # wfh_request_service.alert_staff(staffID, startDate, endDate, actionType)
+        wfh_request_service.alert_staff(staffID, date, shift, actionType)
+
+        return jsonify({"message": "Staff alerted successfully."}), 200
+    
 
     @app.route("/wfh_request", methods=["POST"])
     def create_wfh_request():
