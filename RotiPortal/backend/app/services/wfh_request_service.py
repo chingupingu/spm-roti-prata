@@ -155,3 +155,6 @@ WFH System"""
     
     def delete_wfh_request(self, request_id: str):
         self.wfh_request_repository.delete_wfh_request(request_id)
+
+    def get_schedules_and_employees_by_dept(self, dept: str) -> dict:
+        return self.wfh_request_repository.get_schedules_and_employees_by_dept(dept)

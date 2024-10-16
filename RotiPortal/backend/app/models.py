@@ -44,24 +44,3 @@ class WfhRequest:
                 attachment_url={self.attachment_url}\
                 status={self.status}\
             )"
-
-                
-class Schedule:
-    # id_iter = itertools.count()
-    def __init__(self, Staff_ID, Date, Duration, Status, Work_Arrangement, doc_id=None):
-        self.Staff_ID = Staff_ID
-        self.Date = Date
-        self.Duration = Duration
-        self.Status = Status
-        self.Work_Arrangement = Work_Arrangement
-
-    @staticmethod
-    def __repr__(self):
-        return f"Schedule(\
-                doc_id={self.doc_id}, \
-                Staff_ID={self.Staff_ID}, \
-                Date={self.Date}, \
-                Duration={self.Duration}, \
-                Status={self.Status}, \
-                Work_Arrangement={self.Work_Arrangement}\
-            )"

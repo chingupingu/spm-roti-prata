@@ -129,13 +129,13 @@
   };
 
   // Adjusted schedule data to match the new structure
-  const scheduleData = ref([])
+  const scheduleData = ref([]);
 
   onMounted(async () => {
     try {
       employee_obj = JSON.parse(sessionStorage.getItem("employee_obj"))
       staff_id = employee_obj.Staff_ID
-      const response = await axios.get('http://127.0.0.1:5000/schedule/' + staff_id)
+      const response = await axios.get('http://127.0.0.1:5000/wfh_request/staff/' + staff_id)
       scheduleData.value = response.data
     } catch (error) {
       console.error('Error fetching schedule data:', error)
@@ -146,15 +146,15 @@
   const schedule = computed(() => {
     const map = {};
     scheduleData.value.forEach(entry => {
-      const dateStr = new Date(entry.Date).toDateString();
+      const dateStr = new Date(entry.date).toDateString();
 
       if (!map[dateStr]) {
-        map[dateStr] = { AM: { arrangement: 'No Status', status: 'No Status' }, PM: { arrangement: 'No Status', status: 'No Status' } };
+        map[dateStr] = { AM: { arrangement: 'Work from Office', status: 'Approved' }, PM: { arrangement: 'Work from Office', status: 'Approved' } };
       }
 
-      const period = entry.Duration === 'FD' ? ['AM', 'PM'] : [entry.Duration];
+      const period = entry.shift === 'FD' ? ['AM', 'PM'] : [entry.shift];
       period.forEach(p => {
-        map[dateStr][p] = { arrangement: entry.Work_Arrangement, status: entry.Status };
+        map[dateStr][p] = { arrangement: 'Work from Home', status: entry.status };
       });
     });
     return map;
@@ -179,6 +179,7 @@
 
     for (let d = new Date(start); d < end; d.setDate(d.getDate() + 1)) {
       const dateString = d.toDateString()
+
       days.push({
         date: new Date(d),
         status: schedule.value[dateString] || { AM: 'No Status', PM: 'No Status' }
@@ -212,6 +213,7 @@
     for (let d = 1; d <= lastDay.getDate(); d++) {
       const date = new Date(year, month, d)
       const dateString = date.toDateString()
+
       days.push({
         date,
         isCurrentMonth: true,
@@ -276,14 +278,13 @@
   }
   
   const getStatusClass = (day, period) => {
-    const arrangement = day.status[period]?.arrangement || 'No Status';
-    const status = day.status[period]?.status || 'No Status';
-    return statusColors[arrangement]?.[status] || 'bg-gray-100';
+    const arrangement = day.status[period]?.arrangement || 'Work from Office';
+    const status = day.status[period]?.status || 'Approved';
+    return statusColors[arrangement]?.[status] || 'bg-blue-200';
   };
 
   const getStatusText = (day, period) => {
-    const arrangement = day.status[period]?.arrangement || 'No Status';
-    const status = day.status[period]?.status || 'No Status';
+    const arrangement = day.status[period]?.arrangement || 'Work from Office';
     return `${arrangement}`;
   };
 

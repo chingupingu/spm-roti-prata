@@ -160,7 +160,7 @@ onMounted(async () => {
     const employee_obj = JSON.parse(sessionStorage.getItem("employee_obj"));
     const user_dept = employee_obj.Dept;
 
-    const response = await axios.get('http://127.0.0.1:5000/deptSchedule', {
+    const response = await axios.get('http://127.0.0.1:5000/wfh_request/deptSchedule', {
       headers: {
         'Dept': user_dept
       }
@@ -200,7 +200,7 @@ const visibleDays = computed(() => {
       ) || [];
 
       // Default status assignment
-      acc[member] = { AM: 'No Status', PM: 'No Status' };
+      acc[member] = { AM: 'Work from Office', PM: 'Work from Office' };
 
       entries.forEach(entry => {
         if (entry.Duration === 'FD') {
@@ -251,8 +251,8 @@ const monthlyCalendar = computed(() => {
       date,
       isCurrentMonth: true,
       status: selectedMembers.value.reduce((acc, member) => {
-        const entries = schedule.value[member]?.filter(entry => entry.Date.startsWith(dateString)) || [];
-        acc[member] = { AM: 'No Status', PM: 'No Status' };
+        const entries = schedule.value[member]?.filter(entry => entry.Date.startsWith(dateString) && entry.Status === 'Approved') || [];
+        acc[member] = { AM: 'Work from Office', PM: 'Work from Office' };
 
         entries.forEach(entry => {
           if (entry.Duration === 'FD') {
@@ -326,15 +326,15 @@ const changeDate = (delta) => {
 
 const getStatusClass = (day, member, period) => {
   const status = day.status[member]?.[period];
-  return statusColors[status] || 'bg-gray-100';
+  return statusColors[status] || 'bg-blue-100';
 };
 
 const getStatusText = (day, member, period) => {
-  return day.status[member]?.[period] || 'No Status';
+  return day.status[member]?.[period] || 'Work from Office';
 };
 
 const getDayBackgroundColor = (day) => {
-  if (!day.isCurrentMonth) return 'bg-gray-100'
+  if (!day.isCurrentMonth) return 'bg-blue-100'
 
   const statuses = Object.values(day.status).flatMap(s => [s.AM, s.PM])
   const counts = statuses.reduce((acc, status) => {

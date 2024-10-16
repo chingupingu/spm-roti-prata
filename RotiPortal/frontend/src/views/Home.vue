@@ -16,12 +16,12 @@
                         @click.prevent="activeTab = 'staff'">WFH Dashboard</a>
                 </li>
                 <!-- schedule -->
-                <li class="nav-item" v-if="role == 3">
+                <li class="nav-item" v-if="role == 1 || role == 2 || role == 3">
                     <a class="nav-link" :class="{ active: activeTab === 'schedule' }" href="#"
                         @click.prevent="activeTab = 'schedule'">Own Schedule</a>
                 </li>
                 <!-- team schedule -->
-                <li class="nav-item" v-if="role == 3">
+                <li class="nav-item" v-if="role == 1 || role == 2 || role == 3">
                     <a class="nav-link" :class="{ active: activeTab === 'teamSchedule' }" href="#"
                         @click.prevent="activeTab = 'teamSchedule'">Team Schedule</a>
                 </li>
