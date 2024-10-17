@@ -124,7 +124,7 @@
       'Approved': 'bg-gray-400',
     },
     'No Status': {
-      'No Status': 'bg-gray-100',
+      '': 'bg-gray-100',
     },
   };
 

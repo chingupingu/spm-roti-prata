@@ -15,10 +15,10 @@
                     <a class="nav-link" :class="{ active: activeTab === 'staff' }" href="#"
                         @click.prevent="activeTab = 'staff'">WFH Dashboard</a>
                 </li>
-                <!-- schedule -->
-                <li class="nav-item" v-if="role == 1 || role == 2 || role == 3">
-                    <a class="nav-link" :class="{ active: activeTab === 'schedule' }" href="#"
-                        @click.prevent="activeTab = 'schedule'">Own Schedule</a>
+                <!-- own schedule -->
+                <li class="nav-item">
+                    <a class="nav-link" :class="{ active: activeTab === 'ownSchedule' }" href="#"
+                        @click.prevent="activeTab = 'ownSchedule'">Own Schedule</a>
                 </li>
                 <!-- team schedule -->
                 <li class="nav-item" v-if="role == 1 || role == 2 || role == 3">
@@ -45,16 +45,16 @@
 
         <!-- Staff Dashboard -->
         <div v-if="activeTab === 'staff'" class="staff-dashboard">
-            <div class="row align-items-start" style="margin-top: 150px;">
+            <div class="row align-items-start" style="margin-top: 155px;">
                 <WFHRequestView />
             </div>
         </div>
         
         <!-- Own Schedule -->
-        <div v-if="activeTab === 'schedule'" class="own-schedule">
-            <div class="row align-items-start" style="margin-top: 120px;">
-                <h2 class="mb-4">Own Schedule</h2>
-                <ScheduleView />
+        <div v-if="activeTab === 'ownSchedule'" class="own-schedule">
+            <div class="row align-items-start" style="margin-top: 155px;">
+                <h2>Own Schedule</h2>
+                <OwnScheduleView />
             </div>
         </div>
 
@@ -68,11 +68,19 @@
 
         <!-- Manager Approval Dashboard -->
         <div v-if="activeTab === 'manager'" class="manager-dashboard">
-            <div class="row align-items-start justify-content-center" style="margin-top: 150px;">
+            <div class="row align-items-start justify-content-center" style="margin-top: 155px;">
                 <ManagerApprovalView />
             </div>
         </div>
 
+        <!-- Company Schedule -->
+        <div v-if="activeTab === 'companySchedule'" class="company-schedule">
+            <div class="row align-items-start" style="margin-top: 155px;">
+                <h2>Company Schedule</h2>
+                <CompanyScheduleView />
+            </div>
+        </div>
+        
         <!-- Management Report -->
         <div v-if="activeTab === 'report'" class="management-report">
             <div class="row align-items-start" style="margin-top: 155px;">
@@ -133,18 +141,20 @@
 
 <script>
 import axios from 'axios';
-import ScheduleView from '../components/ScheduleView.vue';
 import TeamScheduleView from '../components/TeamScheduleView.vue';
 import WFHRequestView from '../components/WFHRequestView.vue';
+import OwnScheduleView from '../components/OwnScheduleView.vue';
 import ManagerApprovalView from '../components/ManagerApprovalView.vue';
+
+import CompanyScheduleView from '../components/CompanyScheduleView.vue';
 
 export default {
     components: {
         WFHRequestView,
-        ScheduleView,
+        OwnScheduleView,
         ManagerApprovalView,
-        ScheduleView,
-        TeamScheduleView
+        TeamScheduleView,
+        CompanyScheduleView
     },
     data() {
         return {
