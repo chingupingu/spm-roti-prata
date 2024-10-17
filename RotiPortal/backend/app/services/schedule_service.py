@@ -18,11 +18,14 @@ class ScheduleService:
     def get_schedule(self, doc_id: str) -> list[Schedule]:
         return self.schedule_repository.get_schedule(doc_id)
     
+    def get_all_schedules(self) -> list[Schedule]:
+        return self.schedule_repository.get_all_schedules()
+    
+    def get_schedules_by_date(self, date: str) -> list[Schedule]:
+        return self.schedule_repository.get_schedules_by_date(date)
+    
     def update_schedule(self, schedule: Schedule):
         self.schedule_repository.update_schedule(schedule)
 
     def delete_schedule(self, doc_id: str):
         self.schedule_repository.delete_schedule(doc_id)
-
-    def get_all_schedules(self) -> list[Schedule]:
-        return self.schedule_repository.get_all_schedules()

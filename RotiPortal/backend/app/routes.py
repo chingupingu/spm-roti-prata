@@ -184,6 +184,33 @@ def register_routes(app):
         schedules = schedule_service.get_schedule(doc_id)
         return jsonify([schedule.__dict__ for schedule in schedules])
     
+    @app.route('/schedule', methods=['GET'])
+    def get_all_schedules():
+        schedules = schedule_service.get_all_schedules()
+        return jsonify([schedule.__dict__ for schedule in schedules])
+    
+    @app.route('/schedule/date', methods=['POST'])
+    def get_schedules_by_date():
+        data = request.json
+        date = data.get('date')
+        schedules = schedule_service.get_schedules_by_date(date)
+        return jsonify([schedule.__dict__ for schedule in schedules])
+    
+    # @app.route('/schedule/wfo', methods=['POST'])
+    # def get_wfo_percentage():
+    #     data = request.json
+    #     date = data.get('date')
+    #     shift = data.get('shift')
+    #     schedules = schedule_service.get_schedules_by_date(date)
+    #     wfo_count = 0
+    #     total_count = 0
+    #     for schedule in schedules:
+    #         if schedule.shift == shift:
+    #             total_count += 1
+    #             if schedule.Work_Arrangement == "Work from Office":
+    #                 wfo_count += 1
+    #     return jsonify({"wfo_percentage": wfo_count/total_count})
+    
     @app.route('/schedule/<doc_id>', methods=['PUT'])
     def update_schedule(doc_id):
         data = request.json
@@ -202,8 +229,3 @@ def register_routes(app):
     def delete_schedule(doc_id):
         schedule_service.delete_schedule(doc_id)
         return '', 204
-
-    @app.route('/schedule', methods=['GET'])
-    def get_all_schedules():
-        schedules = schedule_service.get_all_schedules()
-        return jsonify([schedule.__dict__ for schedule in schedules])
