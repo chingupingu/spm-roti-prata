@@ -158,13 +158,16 @@ const schedule = ref([])
 onMounted(async () => {
   try {
     const employee_obj = JSON.parse(sessionStorage.getItem("employee_obj"));
+    console.log(employee_obj);
     const user_dept = employee_obj.Dept;
+    const user_role = employee_obj.Role;
 
     const response = await axios.get('http://127.0.0.1:5000/wfh_request/deptSchedule', {
       headers: {
-        'Dept': user_dept
+        'Dept': user_dept,
+        'Role': user_role
       }
-    });
+    });    
     schedule.value = response.data
     console.log(schedule.value)
 

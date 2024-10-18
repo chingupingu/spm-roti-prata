@@ -189,8 +189,9 @@ def register_routes(app):
     @app.route('/wfh_request/deptSchedule', methods=['GET'])
     def get_schedules_by_dept():
         user_dept = request.headers.get('Dept')
-        
+        user_role = request.headers.get('Role')
+
         # Fetch schedules for staff in the same department
-        schedules = wfh_request_service.get_schedules_and_employees_by_dept(user_dept)
+        schedules = wfh_request_service.get_schedules_and_employees_by_dept(user_dept, user_role)
         
         return jsonify(schedules)
