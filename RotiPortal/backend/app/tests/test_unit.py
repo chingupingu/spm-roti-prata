@@ -1,6 +1,5 @@
 import unittest
 from unittest.mock import patch, Mock
-from flask import Flask
 from app import create_app
 
 class MockEmployee:
