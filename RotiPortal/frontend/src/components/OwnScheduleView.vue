@@ -153,8 +153,13 @@
       }
 
       const period = entry.shift === 'FD' ? ['AM', 'PM'] : [entry.shift];
+
+      const arrangement = entry.status === 'Withdrawn' 
+      ? { arrangement: 'Work from Office', status: 'Approved' }
+      : { arrangement: 'Work from Home', status: entry.status };
+
       period.forEach(p => {
-        map[dateStr][p] = { arrangement: 'Work from Home', status: entry.status };
+        map[dateStr][p] = arrangement;
       });
     });
     return map;
