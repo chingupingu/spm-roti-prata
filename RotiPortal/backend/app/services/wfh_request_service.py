@@ -9,7 +9,7 @@ class WfhRequestService:
         self.wfh_request_repository = WfhRequestRepository()
         self.employee_service = EmployeeService()
 
-    def create_wfh_request(self, staff_id: str, date: str, shift: str, reason: str, recurring: bool, attachment_file, status: str) -> str:
+    def create_wfh_request(self, staff_id: str, date: str, shift: str, reason: str, recurring: bool, attachment_file, status: str, comment: str = "") -> str:
         if attachment_file:
             # upload attachments to firebase storage
             bucket = storage.bucket()
@@ -32,7 +32,8 @@ class WfhRequestService:
                                 reason=reason,
                                 recurring=recurring,
                                 attachment_url=attachment_url,
-                                status=status
+                                status=status,
+                                comment=comment,
                                 )
         # is_valid, message = self.validate_wfh_request(wfh_request)
         # if is_valid:
