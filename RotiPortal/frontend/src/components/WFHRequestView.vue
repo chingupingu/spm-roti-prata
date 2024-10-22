@@ -6,52 +6,94 @@
             <div class="card-body">
                 <h5 class="card-title mb-4">Apply for Work From Home</h5>
                 <form @submit.prevent="validateWfhRequest">
-                    <!-- <div class="mb-3">
-                        <label for="wfhDate" class="form-label">Date</label>
-                        <input type="date" id="wfhDate" v-model="wfhRequest.date" class="form-control"
-                            required>
-                    </div> -->
-                    <div class="row">
-                        <div class="col mb-3">
-                            <label for="wfhDate" class="form-label">Date</label>
-                            <v-date-picker v-model="wfhRequest.date" class="form-control">
+                    <div class="row mb-3">
+                        <label class="form-label">Arrangement</label>
+                        <div>
+                            <label class="switch">
+                                <input type="checkbox" v-model="wfhRequest.recurring" />
+                                <span class="slider round"></span>
+                            </label>
+                            <span>{{ wfhRequest.recurring ? 'Recurring' : 'Non-Recurring' }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Non-Recurring Form -->
+                    <div v-if="!wfhRequest.recurring">
+                        <div class="row">
+                            <div class="col mb-3">
+                                <label for="wfhDate" class="form-label">Date</label>
+                                <v-date-picker v-model="wfhRequest.date" class="form-control">
+                                    <template v-slot="{ inputValue, inputEvents }">
+                                        <input
+                                            id="wfhDate"
+                                            :value="inputValue"
+                                            v-on="inputEvents"
+                                            class="form-control"
+                                            required
+                                        />
+                                    </template>
+                                </v-date-picker>
+                                <span class="text-danger">{{ wfh_request_error }}</span>
+                            </div>
+                            <div class="col mb-3">
+                                <label for="shift" class="form-label">Shift</label>
+                                <select name="shift" id="shift" v-model="wfhRequest.shift" class="form-select">
+                                    <option value="FD">Full Day</option>
+                                    <option value="AM">AM</option>
+                                    <option value="PM">PM</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="reason" class="form-label">Reason</label>
+                            <textarea id="reason" v-model="wfhRequest.reason" class="form-control" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="attachments" class="form-label">Attachments</label>
+                            <input type="file" id="attachments" v-on:change="wfhRequest.attachments" class="form-control">
+                        </div>
+                    </div>
+
+                    <!-- Recurring Form -->
+                    <div v-else>
+                        <div class="mb-3">
+                            <label for="multipleDates" class="form-label">Select Dates</label>
+                            <v-date-picker
+                                v-model="wfhRequest.dates"
+                                class="form-control"
+                                :multiple="true"
+                                :range="false"
+                                :input-attr="{ required: true }"
+                            >
                                 <template v-slot="{ inputValue, inputEvents }">
                                     <input
-                                    id="wfhDate"
-                                    :value="inputValue"
-                                    v-on="inputEvents"
-                                    class="form-control"
-                                    required
+                                        id="multipleDates"
+                                        :value="inputValue"
+                                        v-on="inputEvents"
+                                        class="form-control"
+                                        placeholder="Select multiple dates"
                                     />
                                 </template>
                             </v-date-picker>
                             <span class="text-danger">{{ wfh_request_error }}</span>
                         </div>
-                        <div class="col mb-3">
-                            <label for="shift" class="form-label">Shift</label>
-                            <select name="shift" id="shift" v-model="wfhRequest.shift" class="form-select">
-                                <option value="FD">Full Day</option>
-                                <option value="AM">AM</option>
-                                <option value="PM">PM</option>
-                            </select>
+
+                        <div class="mb-3">
+                            <label class="form-label">Selected Dates:</label>
+                            <ul class="list-group">
+                                <li v-for="(date, index) in wfhRequest.dates" :key="index" class="list-group-item">
+                                    {{ formatDateToDD_MMM_YYYY(date) }}
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="recurringReason" class="form-label">Reason for Recurring</label>
+                            <textarea id="recurringReason" v-model="wfhRequest.recurringReason" class="form-control" rows="3" required></textarea>
                         </div>
                     </div>
-                    <div class="col mb-3">
-                        <label for="recurring" class="form-label">Arrangement</label>
-                        <select name="recurring" id="recurring" v-model="wfhRequest.recurring" class="form-select">
-                            <option value="false">Non-Recurring</option>
-                            <option value="true">Recurring</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="reason" class="form-label">Reason</label>
-                        <textarea id="reason" v-model="wfhRequest.reason" class="form-control" rows="3" required></textarea>
-                    </div>
-                    <div class="mb-3">
-                        <label for="attachments" class="form-label">Attachments</label>
-                        <input type="file" id="attachments" v-on:change="wfhRequest.attachments" class="form-control">
-                    </div>
-                    <button type="submit" class="btn btn-primary">Submit Request</button> 
+
+                    <button type="submit" class="btn btn-primary">Submit Request</button>
                 </form>
             </div>
         </div>
@@ -189,17 +231,40 @@ export default {
             wfhRequest: {
                 staff_id: '',
                 date: '',
+                startDate: '',
+                endDate: '',
                 shift: 'FD',
                 reason: '',
                 recurring: false,
+                recurringReason: '',
                 attachments: null,
-                status: 'Pending'
+                status: 'Pending',
+                dates: [], // New property for multiple dates
             },
             your_requests: [],
             wfh_request_error: '',
             selectedRequest: {},
         }
     },
+
+    watch: {
+    'wfhRequest.dates': function(newDates) {
+        if (!Array.isArray(newDates)) {
+            newDates = [newDates]; // Convert to array if it's a single date
+        }
+
+        // Check if the new date already exists in the array
+        newDates.forEach(date => {
+            if (!this.wfhRequest.dates.includes(date)) {
+                this.wfhRequest.dates.push(date);
+            }
+        });
+
+        console.log('Current selected dates:', this.wfhRequest.dates);
+    }
+},
+
+
     computed: {
         sortedYourRequests() {
         const today = new Date();
@@ -234,6 +299,11 @@ export default {
             })
         },
         submitWfhRequest() {
+            const requestPayload = {
+                ...this.wfhRequest,
+                dates: this.wfhRequest.dates.map(date => new Date(date).toISOString()), // Convert to ISO format
+            };
+
             // Logic to submit WFH request
             axios.post("http://127.0.0.1:5000/wfh_request", this.wfhRequest)
             .then(response => {
@@ -249,7 +319,8 @@ export default {
                         reason: '',
                         recurring: false,
                         attachments: null,
-                        status: 'Pending'
+                        status: 'Pending',
+                        dates: [] // Reset dates
                     }
                     this.$forceUpdate()
                     this.populateWfhRequests()
@@ -354,7 +425,52 @@ export default {
         this.wfhRequest.staff_id = this.employee_obj.Staff_ID
     }
 }
+
 </script>
 
 <style>
+/* Add some basic styles for the toggle switch */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+}
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+}
+input:checked + .slider {
+    background-color: #2196F3;
+}
+input:checked + .slider:before {
+    transform: translateX(26px);
+}
+.slider.round {
+    border-radius: 34px;
+}
+.slider.round:before {
+    border-radius: 50%;
+}
 </style>
