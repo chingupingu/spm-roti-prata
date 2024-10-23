@@ -61,7 +61,7 @@ class WfhRequestService:
         )
         # Check if there are already 2 or more WFH requests for the week
         if len(week_requests) >= 2:
-            return (False, "You have exceeded the maximum of 2 WFH requests per week.")
+            return (True, "You have exceeded the maximum of 2 WFH requests per week.")
 
         # Check if there's already a WFH request for the same day
         same_day_requests = [req for req in week_requests if req['date'].split('T')[0] == date]
