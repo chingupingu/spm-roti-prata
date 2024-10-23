@@ -26,12 +26,12 @@
                         @click.prevent="activeTab = 'teamSchedule'">Team Schedule</a>
                 </li>
                 <!-- manager approval -->
-                <li class="nav-item" v-if="role == 3">
+                <li class="nav-item" v-if="role == 1 || role == 3">
                     <a class="nav-link" :class="{ active: activeTab === 'manager' }" href="#"
                         @click.prevent="activeTab = 'manager'">Manager Approval</a>
                 </li>
                 <!-- company schedule -->
-                <li class="nav-item" v-if="role == 1">
+                <li class="nav-item" v-if="dept == 'CEO' || dept == 'HR'">
                     <a class="nav-link" :class="{ active: activeTab === 'companySchedule' }" href="#"
                         @click.prevent="activeTab = 'companySchedule'">Company Schedule</a>
                 </li>
@@ -161,6 +161,7 @@ export default {
             // general data
             employee_obj: {},
             role: 0,
+            dept: "",
             activeTab: 'staff',
 
             departmentBreakdown: [
@@ -181,6 +182,7 @@ export default {
     mounted() {
         this.employee_obj = JSON.parse(sessionStorage.getItem("employee_obj"))
         this.role = this.employee_obj.Role
+        this.dept = this.employee_obj.Dept
     }
 }
 </script>
