@@ -288,7 +288,10 @@ export default {
             axios.post("http://127.0.0.1:5000/wfh_request/validate", this.wfhRequest)
             .then(response => {
                 if (response.data.valid) {
-                    this.submitWfhRequest()
+                    if (response.data.message) {
+                        this.submitWfhRequest(response.data.message)
+                    }
+                    this.submitWfhRequest(null)
                 } else {
                     window.alert(response.data.message)
                     this.wfh_request_error = response.data.message
@@ -298,7 +301,7 @@ export default {
                 console.log(error)
             })
         },
-        submitWfhRequest() {
+        submitWfhRequest(message) {
             const requestPayload = {
                 ...this.wfhRequest,
                 dates: this.wfhRequest.dates.map(date => new Date(date).toISOString()), // Convert to ISO format
@@ -309,8 +312,12 @@ export default {
             .then(response => {
                 console.log(response.data)
                 if (response.status == 201) {
-                    window.alert('Request submitted successfully!')
-                    this.alertSupervisor()
+                    if (message === null) {
+                        window.alert('Request submitted successfully!')
+                        this.alertSupervisor()
+                    } else {
+                        window.alert(message)
+                    }
                     // Reset form after submission
                     this.wfhRequest = {
                         staff_id: this.employee_obj.Staff_ID,
