@@ -84,6 +84,7 @@ def register_routes(app):
         data = request.json
         staff_id = data.get("staff_id")
         date = data.get("date")
+        dates = data.get("dates")
         valid, message = wfh_request_service.validate_wfh_request(staff_id, date)
         return jsonify({"valid": valid, "message": message})
     

@@ -7,13 +7,13 @@
                 <h5 class="card-title mb-4">Apply for Work From Home</h5>
                 <form @submit.prevent="validateWfhRequest">
                     <div class="row mb-3">
-                        <label class="form-label">Arrangement</label>
+                        <h6><label class="form-label">Arrangement</label></h6>
                         <div>
                             <label class="switch">
                                 <input type="checkbox" v-model="wfhRequest.recurring" />
                                 <span class="slider round"></span>
                             </label>
-                            <span>{{ wfhRequest.recurring ? 'Recurring' : 'Non-Recurring' }}</span>
+                            <span class="toggle-text">{{ wfhRequest.recurring ? 'Recurring' : 'Non-Recurring' }}</span>
                         </div>
                     </div>
 
@@ -57,25 +57,27 @@
                     <!-- Recurring Form -->
                     <div v-else>
                         <div class="mb-3">
-                            <label for="multipleDates" class="form-label">Select Dates</label>
+                            <!-- Choose your Shift -->
+                            <div class="col mb-3">
+                                <label for="shift" class="form-label">Shift</label>
+                                <select name="shift" id="shift" v-model="wfhRequest.shift" class="form-select">
+                                    <option value="FD">Full Day</option>
+                                    <option value="AM">AM</option>
+                                    <option value="PM">PM</option>
+                                </select>
+                            </div>
+                            <div class="date-picker-box" @click="showDatePicker = !showDatePicker" style="border: 1px solid #ced4da; padding: 10px; cursor: pointer;">
+                                <span v-if="wfhRequest.dates.length === 0">Click to select dates</span>
+                                <span v-else>{{ wfhRequest.dates.length }} date(s) selected</span>
+                            </div>
+                            <!-- Date Picker -->
                             <v-date-picker
-                                v-model="wfhRequest.dates"
-                                class="form-control"
-                                :multiple="true"
-                                :range="false"
+                                v-if="showDatePicker"
+                                v-model="newDate"
+                                class="form-control mt-2"
                                 :input-attr="{ required: true }"
-                            >
-                                <template v-slot="{ inputValue, inputEvents }">
-                                    <input
-                                        id="multipleDates"
-                                        :value="inputValue"
-                                        v-on="inputEvents"
-                                        class="form-control"
-                                        placeholder="Select multiple dates"
-                                    />
-                                </template>
-                            </v-date-picker>
-                            <span class="text-danger">{{ wfh_request_error }}</span>
+                            />
+                            <button v-if="showDatePicker" @click="addDate" class="btn btn-secondary mt-2">Add Date</button>
                         </div>
 
                         <div class="mb-3">
@@ -219,11 +221,13 @@
 
 <script>
 import { DatePicker } from 'v-calendar';
+import Multiselect from 'vue-multiselect';
 import axios from 'axios'
 export default {
     name: 'WFHRequestView',
     components: {
-        VDatePicker: DatePicker
+        VDatePicker: DatePicker,
+        Multiselect
     },
     data() {
         return {
@@ -241,29 +245,14 @@ export default {
                 status: 'Pending',
                 dates: [], // New property for multiple dates
             },
+            newDate: '', // New variable to hold the single date from the date picker
+            dates: [], // Options for the multiselect
             your_requests: [],
             wfh_request_error: '',
             selectedRequest: {},
+            showDatePicker: false
         }
     },
-
-    watch: {
-    'wfhRequest.dates': function(newDates) {
-        if (!Array.isArray(newDates)) {
-            newDates = [newDates]; // Convert to array if it's a single date
-        }
-
-        // Check if the new date already exists in the array
-        newDates.forEach(date => {
-            if (!this.wfhRequest.dates.includes(date)) {
-                this.wfhRequest.dates.push(date);
-            }
-        });
-
-        console.log('Current selected dates:', this.wfhRequest.dates);
-    }
-},
-
 
     computed: {
         sortedYourRequests() {
@@ -281,6 +270,14 @@ export default {
                 if (employee.Staff_ID == staff_id) {
                     return employee.Staff_FName + " " + employee.Staff_LName
                 }
+            }
+        },
+        addDate() {
+            if (this.newDate && !this.wfhRequest.dates.includes(this.newDate)) {
+                this.wfhRequest.dates.push(this.newDate);
+                this.dates.push({ date: this.newDate }); // Add to multiselect options
+                this.newDate = ''; // Clear the input field
+                console.log(this.wfhRequest.dates);
             }
         },
         validateWfhRequest() {
@@ -440,14 +437,16 @@ export default {
 .switch {
     position: relative;
     display: inline-block;
-    width: 60px;
-    height: 34px;
+    width: 40px; /* Adjust width */
+    height: 20px; /* Adjust height */
 }
+
 .switch input {
     opacity: 0;
     width: 0;
     height: 0;
 }
+
 .slider {
     position: absolute;
     cursor: pointer;
@@ -455,29 +454,55 @@ export default {
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: #ccc;
+    background-color: #ccc; /* Default background */
     transition: .4s;
 }
+
 .slider:before {
     position: absolute;
     content: "";
-    height: 26px;
-    width: 26px;
-    left: 4px;
-    bottom: 4px;
+    height: 16px; /* Adjust knob height */
+    width: 16px; /* Adjust knob width */
+    left: 2px; /* Adjust position */
+    bottom: 2px; /* Adjust position */
     background-color: white;
     transition: .4s;
 }
+
 input:checked + .slider {
-    background-color: #2196F3;
+    background-color: #2196F3; /* Color when checked */
 }
+
 input:checked + .slider:before {
-    transform: translateX(26px);
+    transform: translateX(20px); /* Move knob when checked */
 }
+
 .slider.round {
     border-radius: 34px;
 }
+
 .slider.round:before {
     border-radius: 50%;
+}
+
+/* Optional: Adjust button styles */
+.btn-secondary {
+    width: 100%; /* Make button full-width */
+}
+
+/* Optional: Style for the multiselect */
+.multiselect {
+    border: 1px solid #ced4da; /* Default Bootstrap border */
+    border-radius: 0.25rem; /* Bootstrap border-radius */
+}
+.toggle-text {
+    margin-left: 10px; /* Adjust the value as needed for spacing */
+}
+.date-picker-box {
+    border: 1px solid #ced4da; /* Default Bootstrap border */
+    border-radius: 0.25rem; /* Bootstrap border-radius */
+    padding: 10px; /* Add some padding */
+    cursor: pointer; /* Change cursor to pointer */
+    background-color: #f8f9fa; /* Light background */
 }
 </style>
