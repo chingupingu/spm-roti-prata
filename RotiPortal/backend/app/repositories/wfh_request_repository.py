@@ -68,10 +68,11 @@ class WfhRequestRepository(BaseRepository):
             for doc in employee_docs:
                 first_name = doc.get('Staff_FName')
                 staff_role = doc.get('Role')
+                staff_position = doc.get('Position')
                 staff_id = doc.id
                 staff_ids.append(staff_id)
 
-                if first_name not in employees and staff_role == 1:
+                if first_name not in employees and staff_role == 1 and staff_position != "HR Team":
                     employees[first_name] = {
                         "Staff_ID": staff_id,
                         "Schedules": []
@@ -117,7 +118,13 @@ class WfhRequestRepository(BaseRepository):
             return {}
 
         # Step 3: Retrieve schedules for the employees
-        schedules_data = self.db.collection('WfhRequest').where('staff_id', 'in', staff_ids).stream()
+        schedules_data = []
+        batch_size = 30
+
+        for i in range(0, len(staff_ids), batch_size):
+            batch_ids = staff_ids[i:i + batch_size]
+            batch_schedules = self.db.collection('WfhRequest').where('staff_id', 'in', batch_ids).stream()
+            schedules_data.extend(batch_schedules)
 
         # Step 4: Group schedules under each employee's first name
         for schedule_doc in schedules_data:
