@@ -55,21 +55,47 @@ class WfhRequestRepository(BaseRepository):
         return filtered_requests
 
     def get_schedules_and_employees_by_dept(self, dept: str, role: str) -> dict:
-        # Step 1: Fetch employees by department
-        employee_docs = self.db.collection('Employee').where('Dept', '==', dept).stream()
+        if (dept == "CEO") :
+            employee_docs = self.db.collection('Employee').stream()
+        else :
+            employee_docs = self.db.collection('Employee').where('Dept', '==', dept).stream()
 
         # Create a dictionary with first name as the key
         employees = {}
         staff_ids = []
-        
-        if role == "2" :
+
+        if dept == "CEO" :
             for doc in employee_docs:
                 first_name = doc.get('Staff_FName')
                 staff_role = doc.get('Role')
                 staff_id = doc.id
                 staff_ids.append(staff_id)
 
-                if first_name not in employees and staff_role != 3:
+                if first_name not in employees and staff_role == 1:
+                    employees[first_name] = {
+                        "Staff_ID": staff_id,
+                        "Schedules": []
+                    }
+        elif role == "2" :
+            for doc in employee_docs:
+                first_name = doc.get('Staff_FName')
+                staff_role = doc.get('Role')
+                staff_id = doc.id
+                staff_ids.append(staff_id)
+
+                if first_name not in employees and staff_role != 1 and staff_role != 3:
+                    employees[first_name] = {
+                        "Staff_ID": staff_id,
+                        "Schedules": []
+                    }
+        elif role == "3":
+            for doc in employee_docs:
+                first_name = doc.get('Staff_FName')
+                staff_role = doc.get('Role')
+                staff_id = doc.id
+                staff_ids.append(staff_id)
+
+                if first_name not in employees and staff_role != 1:
                     employees[first_name] = {
                         "Staff_ID": staff_id,
                         "Schedules": []
@@ -84,7 +110,7 @@ class WfhRequestRepository(BaseRepository):
                     employees[first_name] = {
                         "Staff_ID": staff_id,
                         "Schedules": []
-                    }          
+                    }
 
         # Step 2: If no employees are found, return an empty result
         if not staff_ids:

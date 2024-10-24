@@ -16,6 +16,7 @@
     "lucide-vue-next": "^0.445.0",
     "v-calendar": "^3.1.2",
     "vue": "^3.5.3",
+    "vue-multiselect": "^3.1.0",
     "vue-router": "^4.4.3",
     "vue-toastification": "^2.0.0-rc.5"
   },
