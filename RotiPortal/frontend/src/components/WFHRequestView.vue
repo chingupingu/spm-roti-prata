@@ -287,8 +287,9 @@ export default {
                 if (response.data.valid) {
                     if (response.data.message) {
                         this.submitWfhRequest(response.data.message)
+                    } else {
+                        this.submitWfhRequest(null)
                     }
-                    this.submitWfhRequest(null)
                 } else {
                     window.alert(response.data.message)
                     this.wfh_request_error = response.data.message

@@ -195,11 +195,11 @@ const visibleDays = computed(() => {
   }
 
   for (let d = new Date(start); d < end; d.setDate(d.getDate() + 1)) {
-    const dateString = d.toISOString().split('T')[0];
+    const dateString = d.toDateString();
 
     const dayStatus = selectedMembers.value.reduce((acc, member) => {
       const entries = schedule.value[member]?.filter(entry => 
-        entry.Date.startsWith(dateString) && entry.Status === 'Approved'
+        new Date(entry.Date).toDateString() === dateString && entry.Status === 'Approved'
       ) || [];
 
       // Default status assignment
@@ -238,7 +238,7 @@ const monthlyCalendar = computed(() => {
 
   // Add padding days from previous month
   for (let i = startPadding - 1; i >= 0; i--) {
-    const d = new Date(Date.UTC(year, month, -i));
+    const d = new Date(year, month, -i)
     days.push({
       date: d,
       isCurrentMonth: false,
@@ -248,13 +248,14 @@ const monthlyCalendar = computed(() => {
 
   // Current month days
   for (let d = 1; d <= lastDay.getDate(); d++) {
-    const date = new Date(Date.UTC(year, month, d));
-    const dateString = date.toISOString().split('T')[0];
+    const date = new Date(year, month, d)
+    const dateString = date.toISOString().slice(0, 10);
+
     days.push({
       date,
       isCurrentMonth: true,
       status: selectedMembers.value.reduce((acc, member) => {
-        const entries = schedule.value[member]?.filter(entry => entry.Date.startsWith(dateString) && entry.Status === 'Approved') || [];
+        const entries = schedule.value[member]?.filter(entry => new Date(entry.Date).toISOString().slice(0, 10) === dateString && entry.Status === 'Approved') || [];
         acc[member] = { AM: 'Work from Office', PM: 'Work from Office' };
 
         entries.forEach(entry => {
@@ -273,7 +274,7 @@ const monthlyCalendar = computed(() => {
 
   // Padding from next month
   for (let i = 1; i <= endPadding; i++) {
-    const d = new Date(Date.UTC(year, month + 1, i));
+    const d = new Date(year, month + 1, i)
     days.push({
       date: d,
       isCurrentMonth: false,
