@@ -46,3 +46,12 @@ class WfhRequest:
                 status={self.status}, \
                 comment={self.comment}\
             )"
+
+class Delegate:
+    def __init__(self, manager_id, delegate_id, start_date, end_date, dept):
+        self.manager_id = manager_id
+        self.delegate_id = delegate_id
+        self.start_date = start_date
+        self.end_date = end_date
+        self.dept = dept
+

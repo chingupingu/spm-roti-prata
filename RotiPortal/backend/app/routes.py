@@ -1,10 +1,12 @@
 from flask import jsonify, request
 from .services.employee_service import EmployeeService
 from .services.wfh_request_service import WfhRequestService
+from .services.delegate_service import DelegateService
 
 # instantiate services here
 employee_service = EmployeeService()
 wfh_request_service = WfhRequestService()
+delegate_service = DelegateService()
 
 # add routes here
 def register_routes(app):
@@ -198,3 +200,46 @@ def register_routes(app):
         schedules = wfh_request_service.get_schedules_and_employees_by_dept(user_dept, user_role)
         
         return jsonify(schedules)
+
+    ################################################################
+    #                      DELEGATE                                #
+    ################################################################
+    @app.route("/delegate", methods=["POST"])
+    def create_delegate():
+        data = request.json
+        doc_id = delegate_service.create_delegate(data["manager_id"], 
+                                                        data["delegate_id"], 
+                                                        data["start_date"], 
+                                                        data["end_date"], 
+                                                        data["dept"])
+        return jsonify({"doc_id": doc_id}), 201
+    
+    @app.route('/delegate', methods=['GET'])
+    def get_all_delegates():
+        delegates = delegate_service.get_all_delegates()
+        return jsonify(delegates)
+
+    @app.route('/delegate/<int:delegate_id>', methods=['GET'])
+    def get_delegate(delegate_id):
+        delegate = delegate_service.get_delegate_by_delegate_id(delegate_id)
+        if delegate:
+            return jsonify(delegate)
+        return jsonify({'error': 'delegation not found'}), 404
+    
+    @app.route('/delegate/manager/<int:manager_id>', methods=['GET'])
+    def get_delegate_by_manager_id(manager_id):
+        delegate = delegate_service.get_delegate_by_manager_id(manager_id)
+        if delegate:
+            return jsonify(delegate)
+        return jsonify({'error': 'delegation not found'}), 404
+    
+    @app.route('/delegate/<int:delegate_id>', methods=['PUT'])
+    def update_delegate(delegate_id):
+        data = request.json
+        delegate_service.update_delegate(delegate_id, data)
+        return jsonify({'message': 'delegation updated successfully'}), 200
+
+    @app.route('/delegate/<doc_id>', methods=['DELETE'])
+    def delete_delegate(doc_id):
+        delegate_service.delete_delegate(doc_id)
+        return '', 204

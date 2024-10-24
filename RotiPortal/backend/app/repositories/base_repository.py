@@ -19,8 +19,23 @@ class BaseRepository(ABC):
         doc = self.db.collection(self.collection_name).document(id).get()
         return doc.to_dict() if doc.exists else None
     
+    def get_by_other_id(self, field: str, value: int):
+        query = self.db.collection(self.collection_name).where(field, "==", value).limit(1)
+        results = query.stream()
+        for doc in results:
+            return {"doc_id": doc.id, **doc.to_dict()}  # Include doc_id in the result
+        return None
+    
     def update(self, id, data):
         self.db.collection(self.collection_name).document(id).update(data)
+
+    def update_by_other_id(self, field: str, value: int, data: dict):
+        query = self.db.collection(self.collection_name).where(field, "==", value).limit(1)
+        results = query.stream()
+        for doc in results:
+            self.db.collection(self.collection_name).document(doc.id).update(data)  # {{ edit_1 }}
+            return True
+        return False
 
     def delete(self, id):
         self.db.collection(self.collection_name).document(id).delete()
