@@ -31,7 +31,7 @@ jobs:
     - name: Set up Google credentials
       run: |
         echo "${{ secrets.SERVICE_ACCOUNT_KEY }}" > /tmp/serviceAccountKey.json
-        export GOOGLE_APPLICATION_CREDENTIALS="/tmp/serviceAccountKey.json"
+        export GOOGLE_APPLICATION_CREDENTIALS="/tmp/serviceAccountKey.json" >> $GITHUB_ENV
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
@@ -42,3 +42,5 @@ jobs:
       run: |
         export PYTHONPATH=$PWD/RotiPortal/backend
         python -m pytest RotiPortal/backend/app/tests
+      env:
+        GOOGLE_APPLICATION_CREDENTIALS: /tmp/serviceAccountKey.json
