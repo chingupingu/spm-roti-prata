@@ -1,6 +1,5 @@
 import unittest
-from unittest import mock
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch, Mock
 from app import create_app
 
 class MockEmployee:
@@ -20,8 +19,7 @@ class MockWfhRequest:
         self.status = status
 
 class TestRoutes(unittest.TestCase):
-    @mock.patch("firebase_admin.credentials.Certificate", return_value=MagicMock())
-    def setUp(self, mock_certificate):
+    def setUp(self):
         self.app = create_app()
         self.client = self.app.test_client()
         self.app.testing = True
