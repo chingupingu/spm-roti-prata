@@ -5,9 +5,9 @@ name: RotiPortal
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "ping-test-autotest" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "ping-test-autotest" ]
 
 permissions:
   contents: read
