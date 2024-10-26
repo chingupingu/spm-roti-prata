@@ -1,3 +1,4 @@
+import json
 import unittest
 from unittest.mock import patch, Mock
 from app import create_app
@@ -19,7 +20,6 @@ class MockWfhRequest:
         self.status = status
 
 class TestRoutes(unittest.TestCase):
-    
     def setUp(self):
         self.app = create_app()
         self.client = self.app.test_client()
@@ -44,25 +44,26 @@ class TestRoutes(unittest.TestCase):
         
         # Assert status code and response data
         self.assertEqual(response.status_code, 201)
-        self.assertEqual(response.json, {"Staff_ID": "EMP123"})
+        self.assertEqual(response.get_json(), {"Staff_ID": "EMP123"})
 
     @patch('app.services.employee_service.EmployeeService.get_employee')
     def test_get_employee(self, mock_get_employee):
-        # Return a mock employee object
-        mock_get_employee.return_value = MockEmployee(
+        # Create and return a mock employee object
+        mock_employee = MockEmployee(
             staff_id="EMP123",
             first_name="John",
             last_name="Doe",
             dept="Engineering",
             position="Developer"
         )
+        mock_get_employee.return_value = mock_employee
 
         # Test the GET request for a specific employee
         response = self.client.get('/employee/EMP123')
 
         # Assert status code and response data
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json, {
+        self.assertEqual(response.get_json(), {
             "Staff_ID": "EMP123",
             "Staff_FName": "John",
             "Staff_LName": "Doe",
@@ -80,7 +81,7 @@ class TestRoutes(unittest.TestCase):
         
         # Assert status code and error message
         self.assertEqual(response.status_code, 404)
-        self.assertEqual(response.json, {'error': 'User not found'})
+        self.assertEqual(response.get_json(), {'error': 'User not found'})
 
     @patch('app.services.employee_service.EmployeeService.get_all_employees')
     def test_get_all_employees(self, mock_get_all_employees):
@@ -89,13 +90,13 @@ class TestRoutes(unittest.TestCase):
             {"Staff_ID": "EMP123", "Staff_FName": "John", "Dept": "Engineering"},
             {"Staff_ID": "EMP124", "Staff_FName": "Jane", "Dept": "Sales"}
         ]
-        
+
         # Test the GET request to retrieve all employees
         response = self.client.get('/employee')
         
         # Assert status code and response data
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json, [
+        self.assertEqual(response.get_json(), [
             {"Staff_ID": "EMP123", "Staff_FName": "John", "Dept": "Engineering"},
             {"Staff_ID": "EMP124", "Staff_FName": "Jane", "Dept": "Sales"}
         ])
@@ -124,25 +125,26 @@ class TestRoutes(unittest.TestCase):
         
         # Assert status code and response data
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json, {"valid": True, "message": "WFH request is valid."})
+        self.assertEqual(response.get_json(), {"valid": True, "message": "WFH request is valid."})
 
     @patch('app.services.wfh_request_service.WfhRequestService.get_wfh_request')
     def test_get_wfh_request(self, mock_get_wfh_request):
         # Return a mock WFH request object
-        mock_get_wfh_request.return_value = MockWfhRequest(
+        mock_wfh_request = MockWfhRequest(
             request_id="REQ123",
             staff_id="EMP123",
             date="2023-10-18",
             shift="morning",
             status="pending"
         )
+        mock_get_wfh_request.return_value = mock_wfh_request
 
         # Test the GET request for a specific WFH request
         response = self.client.get('/wfh_request/REQ123')
 
         # Assert status code and response data
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json, {
+        self.assertEqual(response.get_json(), {
             "request_id": "REQ123",
             "staff_id": "EMP123",
             "date": "2023-10-18",
@@ -160,4 +162,4 @@ class TestRoutes(unittest.TestCase):
         
         # Assert status code and error message
         self.assertEqual(response.status_code, 404)
-        self.assertEqual(response.json, {'error': 'wfh_request not found'})
+        self.assertEqual(response.get_json(), {'error': 'wfh_request not found'})
