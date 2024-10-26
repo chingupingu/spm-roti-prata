@@ -43,5 +43,5 @@ jobs:
         export PYTHONPATH=$PWD/RotiPortal/backend
         python -m pytest RotiPortal/backend/app/tests
       env:
-        # GOOGLE_APPLICATION_CREDENTIALS: /tmp/serviceAccountKey.json
-        GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.SERVICE_ACCOUNT_KEY }}
+        GOOGLE_APPLICATION_CREDENTIALS: /tmp/serviceAccountKey.json
+        # GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.SERVICE_ACCOUNT_KEY }}
