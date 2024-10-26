@@ -20,7 +20,8 @@ class MockWfhRequest:
         self.status = status
 
 class TestRoutes(unittest.TestCase):
-    def setUp(self):
+    @patch('firebase_admin.initialize_app')
+    def setUp(self, mock_initialize_app):
         self.app = create_app()
         self.client = self.app.test_client()
         self.app.testing = True
