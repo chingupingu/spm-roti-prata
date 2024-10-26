@@ -28,7 +28,7 @@ class TestRoutes(unittest.TestCase):
     @patch('app.services.employee_service.EmployeeService.create_employee')
     def test_create_employee(self, mock_create_employee):
         # Mock the response from employee_service.create_employee
-        mock_create_employee.return_value = 'EMP123'
+        mock_create_employee.return_value = "EMP123"
         
         # Test the POST request to create an employee
         response = self.client.post('/employee', json={
@@ -81,7 +81,11 @@ class TestRoutes(unittest.TestCase):
         
         # Assert status code and error message
         self.assertEqual(response.status_code, 404)
+<<<<<<< Updated upstream
         self.assertEqual(response.get_json(), {'error': 'User not found'})
+=======
+        self.assertEqual(response.json, {"error": "User not found"})
+>>>>>>> Stashed changes
 
     @patch('app.services.employee_service.EmployeeService.get_all_employees')
     def test_get_all_employees(self, mock_get_all_employees):
@@ -162,4 +166,8 @@ class TestRoutes(unittest.TestCase):
         
         # Assert status code and error message
         self.assertEqual(response.status_code, 404)
+<<<<<<< Updated upstream
         self.assertEqual(response.get_json(), {'error': 'wfh_request not found'})
+=======
+        self.assertEqual(response.json, {"error": "wfh_request not found"})
+>>>>>>> Stashed changes
