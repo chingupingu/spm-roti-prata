@@ -1,4 +1,5 @@
 from flask import jsonify, request
+from datetime import datetime
 from .services.employee_service import EmployeeService
 from .services.wfh_request_service import WfhRequestService
 from .services.delegate_service import DelegateService
@@ -220,7 +221,7 @@ def register_routes(app):
         return jsonify(delegates)
 
     @app.route('/delegate/<int:delegate_id>', methods=['GET'])
-    def get_delegate(delegate_id):
+    def get_delegate_by_delegate_id(delegate_id):
         delegate = delegate_service.get_delegate_by_delegate_id(delegate_id)
         if delegate:
             return jsonify(delegate)
@@ -243,3 +244,27 @@ def register_routes(app):
     def delete_delegate(doc_id):
         delegate_service.delete_delegate(doc_id)
         return '', 204
+
+    @app.route('/delegate/cleanup', methods=['DELETE'])
+    def cleanup_expired_delegates():
+        # Get all delegates
+        delegates = delegate_service.get_all_delegates()
+        
+        # Get current date
+        current_date = datetime.now().date()
+        
+        # Track number of deleted records
+        deleted_count = 0
+        
+        # Iterate through delegates and delete expired ones
+        for delegate in delegates:
+            # Parse end_date from ISO string
+            end_date = datetime.fromisoformat(delegate['end_date']).date()  # Updated line
+            if end_date < current_date:
+                delegate_service.delete_delegate(delegate['doc_id'])
+                deleted_count += 1
+                
+        return jsonify({
+            'message': f'Deleted {deleted_count} expired delegation records',
+            'deleted_count': deleted_count
+        }), 200

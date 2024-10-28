@@ -134,7 +134,10 @@ export default {
             actionType: '',             // To store whether it's 'approve' or 'reject'
             requestId: null,            // Store the request ID for the selected action
             comment: '',                // Store the comment input from the user
-            selectedRequest: {}
+            selectedRequest: {},
+
+            // delegate data
+            delegateData: {}
         }
     },
     computed: {
@@ -331,15 +334,28 @@ export default {
                 }
             }
         },
-        async fetchEmployeeData() {
-            axios.get(`http://127.0.0.1:5000/employee/manager/${this.employee_obj.Staff_ID}`)
-            .then(response => {
-                this.employees = response.data
-                this.fetchEmployeeRequests()
-            })
-            .catch(error => {
-                console.log(error)
-            })
+        // async fetchEmployeeData(staff_id) {
+        //     axios.get(`http://127.0.0.1:5000/employee/manager/${staff_id}`)
+        //     .then(response => {
+        //         this.employees = response.data
+        //         this.fetchEmployeeRequests()
+        //     })
+        //     .catch(error => {
+        //         console.log(error)
+        //     })
+        // },
+
+        // takes in a list of staff_ids
+        async fetchEmployeeData(staff_id_list) {
+            for (const staff_id of staff_id_list) {
+                try {
+                    const response = await axios.get(`http://127.0.0.1:5000/employee/manager/${staff_id}`)
+                    this.employees.push(...response.data)
+                } catch (error) {
+                    console.log(error)
+                }
+            }
+            this.fetchEmployeeRequests()
         },
         async fetchEmployeeRequests() {
             for (const employee of this.employees) {
@@ -356,11 +372,49 @@ export default {
         formatDateToDD_MMM_YYYY(dateString) {
             const date = new Date(dateString);
             return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+        },
+        isDelegate(staff_id) {
+            // check if the staff_id exists in the delegate collection
+            axios.get(`http://127.0.0.1:5000/delegate/${staff_id}`)
+            .then(response => {
+                // if it does, fetch the delegate data
+                this.delegateData = response.data
+                const today = new Date();
+                const startDate = new Date(this.delegateData.start_date);
+                const endDate = new Date(this.delegateData.end_date);
+                
+                // check if the delegation is within the date range
+                if (today >= startDate && today <= endDate) {
+                    console.log("Delegation valid (within date range)");
+                    this.fetchEmployeeData([this.delegateData.manager_id, staff_id])
+                } else {
+                    console.log("Delegation invalid (not within date range)")
+                    this.fetchEmployeeData([staff_id])
+                }
+            })
+            // if the staff_id does not exist in the delegate collection, 
+            // fetch the employee data of employees under this manager
+            .catch(error => {
+                console.log("This employee is not a delegate.")
+                this.fetchEmployeeData([staff_id])
+                
+            })
+        },
+        cleanupExpiredDelegates() {
+            axios.delete('http://127.0.0.1:5000/delegate/cleanup')
+            .then(response => {
+                console.log(response.data.message)
+            })
+            .catch(error => {
+                console.log(error)
+            })
         }
     },
     mounted() {
         this.employee_obj = JSON.parse(sessionStorage.getItem("employee_obj"))
-        this.fetchEmployeeData()
+        this.cleanupExpiredDelegates()
+        this.isDelegate(this.employee_obj.Staff_ID)
+        // this.fetchEmployeeData()
     }
 }
 
