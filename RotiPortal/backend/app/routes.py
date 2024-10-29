@@ -129,7 +129,8 @@ def register_routes(app):
             data.get("recurring", False), 
             attachment_file,
             data["status"],
-            data.get("comment", "")  # New field
+            data.get("comment", ""),
+            data.get("approving_manager", "")
         )
         
         if isinstance(result, tuple):
@@ -173,8 +174,8 @@ def register_routes(app):
             wfh_request.recurring = data.get('recurring', wfh_request.recurring)
             # wfh_request.attachment_url = data.get('attachment_url', wfh_request.attachment_url)
             wfh_request.status = data.get('status', wfh_request.status)
-            wfh_request.comment = data.get('comment', wfh_request.comment)  # New field
-
+            wfh_request.comment = data.get('comment', wfh_request.comment)
+            wfh_request.approving_manager = data.get('approving_manager', wfh_request.approving_manager)
             if new_attachment:
                 if wfh_request.attachment_url:
                     wfh_request_service.delete_attachment(wfh_request.attachment_url)

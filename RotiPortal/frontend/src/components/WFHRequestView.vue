@@ -168,6 +168,18 @@
                                 <th>Status:</th>
                                 <td>{{ selectedRequest.status }}</td>
                             </tr>
+                            <tr v-if="selectedRequest.status === 'Approved' || selectedRequest.status === 'Rejected'">
+                                <th>Comment:</th>
+                                <td>{{ selectedRequest.comment }}</td>
+                            </tr>
+                            <tr v-if="selectedRequest.status === 'Approved'">
+                                <th>Approved By:</th>
+                                <td>{{ selectedRequest.approving_manager }}</td>
+                            </tr>
+                            <tr v-if="selectedRequest.status === 'Rejected'">
+                                <th>Rejected By:</th>
+                                <td>{{ selectedRequest.approving_manager }}</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -243,7 +255,8 @@ export default {
                 recurringReason: '',
                 attachments: null,
                 status: 'Pending',
-                dates: [], // New property for multiple dates
+                dates: [],
+                approving_manager: ''
             },
             newDate: '', // New variable to hold the single date from the date picker
             dates: [], // Options for the multiselect
@@ -287,8 +300,9 @@ export default {
                 if (response.data.valid) {
                     if (response.data.message) {
                         this.submitWfhRequest(response.data.message)
+                    } else {
+                        this.submitWfhRequest(null)
                     }
-                    this.submitWfhRequest(null)
                 } else {
                     window.alert(response.data.message)
                     this.wfh_request_error = response.data.message

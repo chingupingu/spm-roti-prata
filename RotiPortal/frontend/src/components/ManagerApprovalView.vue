@@ -213,13 +213,13 @@ export default {
 
                 // Submit the comment and status update
                 if (this.actionType === 'approve') {
-                    this.approveRequest(this.requestId, this.comment);
+                    this.approveRequest(this.requestId, this.comment, this.employee_obj.Staff_FName + " " + this.employee_obj.Staff_LName);
                     window.alert('Request approved successfully!')
                     // this.alertStaff(staffID, startDate, endDate, shift, actionType)
                     this.alertStaff(staffID, date, shift, actionType)
                     this.$forceUpdate()
                 } else if (this.actionType === 'reject') {
-                    this.rejectRequest(this.requestId, this.comment);
+                    this.rejectRequest(this.requestId, this.comment, this.employee_obj.Staff_FName + " " + this.employee_obj.Staff_LName);
                     window.alert('Request rejected successfully!')
                     // this.alertStaff(staffID, startDate, endDate, shift, actionType)
                     this.alertStaff(staffID, date, shift, actionType)
@@ -239,10 +239,11 @@ export default {
                 console.log(error)
             })
         },
-        approveRequest(requestId, comment) {
+        approveRequest(requestId, comment, approving_manager) {
             const payload = {
                 status: 'Approved',
-                comment: comment
+                comment: comment,
+                approving_manager: approving_manager
             };
 
             // Make the API call to update the status in the backend
@@ -260,10 +261,11 @@ export default {
                     }
                 });
         },
-        rejectRequest(requestId, comment) {
+        rejectRequest(requestId, comment, approving_manager) {
             const payload = {
                 status: 'Rejected', // Change the status to Rejected
-                comment: comment    // Add the comment
+                comment: comment,    // Add the comment
+                approving_manager: approving_manager
             };
 
             // Find the index of the request in your local data
