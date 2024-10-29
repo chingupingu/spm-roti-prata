@@ -531,9 +531,9 @@ input:checked + .slider:before {
 }
 
 /* Optional: Adjust button styles */
-.btn-secondary {
-    width: 100%; /* Make button full-width */
-}
+/* .btn-secondary {
+    width: 100%;
+} */
 
 /* Optional: Style for the multiselect */
 .multiselect {

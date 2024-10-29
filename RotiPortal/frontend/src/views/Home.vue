@@ -9,7 +9,7 @@
                 </button>
             </div>
             <!-- Navigation Tabs -->
-            <ul class="nav nav-tabs justify-content-center mb-4">
+            <ul class="nav nav-tabs justify-content-center">
                 <!-- WFH dashboard -->
                 <li class="nav-item">
                     <a class="nav-link" :class="{ active: activeTab === 'staff' }" href="#"
@@ -60,7 +60,7 @@
 
         <!-- Manager View Team Schedule Dashboard -->
         <div v-if="activeTab === 'teamSchedule'" class="team-schedule">
-            <div class="row align-items-start" style="margin-top: 160px;">
+            <div class="row align-items-start" style="margin-top: 155px;">
                 <h2 class="mb-4">Team Schedule</h2>
                 <TeamScheduleView />
             </div>
@@ -69,6 +69,8 @@
         <!-- Manager Approval Dashboard -->
         <div v-if="activeTab === 'manager'" class="manager-dashboard">
             <div class="row align-items-start justify-content-center" style="margin-top: 155px;">
+                <h2 class="mb-4">Manager Approval Dashboard</h2>
+                <Delegation />
                 <ManagerApprovalView />
             </div>
         </div>
@@ -145,16 +147,16 @@ import TeamScheduleView from '../components/TeamScheduleView.vue';
 import WFHRequestView from '../components/WFHRequestView.vue';
 import OwnScheduleView from '../components/OwnScheduleView.vue';
 import ManagerApprovalView from '../components/ManagerApprovalView.vue';
-
 import CompanyScheduleView from '../components/CompanyScheduleView.vue';
-
+import Delegation from '../components/Delegation.vue';
 export default {
     components: {
         WFHRequestView,
         OwnScheduleView,
         ManagerApprovalView,
         TeamScheduleView,
-        CompanyScheduleView
+        CompanyScheduleView,
+        Delegation
     },
     data() {
         return {

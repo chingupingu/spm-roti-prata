@@ -1,22 +1,22 @@
 <template>
-    <h2 class="mb-4">Manager Approval Dashboard</h2>
-        <!-- Filter Section -->
-        <div class="row mb-4">
-            <div class="col-md-6">
-                <label for="statusFilter" class="form-label">Filter by Status:</label>
-                <select id="statusFilter" v-model="statusFilter" class="form-select">
-                    <option value="">All</option>
-                    <option value="Pending">Pending</option>
-                    <option value="Approved">Approved</option>
-                    <option value="Rejected">Rejected</option>
-                </select>
-            </div>
-
-            <div class="col-md-6">
-                <label for="teamMemberFilter" class="form-label">Filter by Team Member:</label>
-                <input id="teamMemberFilter" v-model="teamMemberFilter" class="form-control" placeholder="Enter team member name">
-            </div>
+    <!-- <h2 class="mb-4">Manager Approval Dashboard</h2> -->
+    <!-- Filter Section -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <label for="statusFilter" class="form-label">Filter by Status:</label>
+            <select id="statusFilter" v-model="statusFilter" class="form-select">
+                <option value="">All</option>
+                <option value="Pending">Pending</option>
+                <option value="Approved">Approved</option>
+                <option value="Rejected">Rejected</option>
+            </select>
         </div>
+
+        <div class="col-md-6">
+            <label for="teamMemberFilter" class="form-label">Filter by Team Member:</label>
+            <input id="teamMemberFilter" v-model="teamMemberFilter" class="form-control" placeholder="Enter team member name">
+        </div>
+    </div>
 
     <!-- Requests Table -->
     <div class="card">
