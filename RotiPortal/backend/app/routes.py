@@ -83,9 +83,9 @@ def register_routes(app):
     def validate_wfh_request():
         data = request.json
         staff_id = data.get("staff_id")
-        date = data.get("date")
+        # date = data.get("date")
         dates = data.get("dates")
-        valid, message = wfh_request_service.validate_wfh_request(staff_id, date)
+        valid, message = wfh_request_service.validate_wfh_request(staff_id, dates)
         return jsonify({"valid": valid, "message": message})
     
     @app.route("/wfh_request_alert", methods=["POST"])
@@ -93,9 +93,10 @@ def register_routes(app):
         data = request.json
         staff_id = data.get("staff_id")
         reason = data.get("reason")
-        date = data.get("date")    
+        # date = data.get("date")    
+        dates = data.get("dates")    
         shift = data.get("shift")
-        wfh_request_service.alert_supervisor(staff_id, date, shift, reason)
+        wfh_request_service.alert_supervisor(staff_id, dates, shift, reason)
         return jsonify({"message": "Supervisor alerted successfully."}), 200
 
     @app.route("/wfh_request_update_alert", methods=["POST"])
@@ -120,7 +121,8 @@ def register_routes(app):
         
         result = wfh_request_service.create_wfh_request(
             data["staff_id"], 
-            data["date"], 
+            # data["date"], 
+            data["dates"],
             data["shift"], 
             data["reason"], 
             data.get("recurring", False), 

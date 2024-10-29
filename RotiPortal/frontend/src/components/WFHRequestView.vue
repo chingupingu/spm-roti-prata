@@ -91,7 +91,7 @@
 
                         <div class="mb-3">
                             <label for="recurringReason" class="form-label">Reason for Recurring</label>
-                            <textarea id="recurringReason" v-model="wfhRequest.recurringReason" class="form-control" rows="3" required></textarea>
+                            <textarea id="recurringReason" v-model="wfhRequest.reason" class="form-control" rows="3" required></textarea>
                         </div>
                     </div>
 
@@ -280,24 +280,48 @@ export default {
                 console.log(this.wfhRequest.dates);
             }
         },
+        
+        // // NEW validate
         validateWfhRequest() {
-            // Logic to validate WFH request
             axios.post("http://127.0.0.1:5000/wfh_request/validate", this.wfhRequest)
             .then(response => {
                 if (response.data.valid) {
                     if (response.data.message) {
                         this.submitWfhRequest(response.data.message)
+                    } else {
+                        this.submitWfhRequest(null)
                     }
-                    this.submitWfhRequest(null)
                 } else {
-                    window.alert(response.data.message)
-                    this.wfh_request_error = response.data.message
+                    // Join messages into a single alert
+                    const errorMessage = response.data.message.join('\n');
+                    window.alert(errorMessage);
+                    this.wfh_request_error = errorMessage;
                 }
             })
             .catch(error => {
-                console.log(error)
-            })
+                console.log(error);
+            });
         },
+
+        // // OLD validate
+        // validateWfhRequest() {
+        //     // Logic to validate WFH request
+        //     axios.post("http://127.0.0.1:5000/wfh_request/validate", this.wfhRequest)
+        //     .then(response => {
+        //         if (response.data.valid) {
+        //             if (response.data.message) {
+        //                 this.submitWfhRequest(response.data.message)
+        //             }
+        //             this.submitWfhRequest(null)
+        //         } else {
+        //             window.alert(response.data.message)
+        //             this.wfh_request_error = response.data.message
+        //         }
+        //     })
+        //     .catch(error => {
+        //         console.log(error)
+        //     })
+        // },
         submitWfhRequest(message) {
             const requestPayload = {
                 ...this.wfhRequest,
@@ -305,15 +329,17 @@ export default {
             };
 
             // Logic to submit WFH request
-            axios.post("http://127.0.0.1:5000/wfh_request", this.wfhRequest)
+            axios.post("http://127.0.0.1:5000/wfh_request", requestPayload)
             .then(response => {
                 console.log(response.data)
+                console.log(response.status)
                 if (response.status == 201) {
                     if (message === null) {
                         window.alert('Request submitted successfully!')
                         this.alertSupervisor()
                     } else {
                         window.alert(message)
+                        this.alertSupervisor()
                     }
                     // Reset form after submission
                     this.wfhRequest = {
@@ -331,7 +357,8 @@ export default {
                 }
             })
             .catch(error => {
-                window.alert(error.response.data.error)
+                const errorMessage = error.response ? error.response.data.error : 'An unexpected error occurred';
+                window.alert(errorMessage);
             })
         },
         alertSupervisor() {
