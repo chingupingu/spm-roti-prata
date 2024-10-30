@@ -91,7 +91,7 @@
 
                         <div class="mb-3">
                             <label for="recurringReason" class="form-label">Reason for Recurring</label>
-                            <textarea id="recurringReason" v-model="wfhRequest.recurringReason" class="form-control" rows="3" required></textarea>
+                            <textarea id="recurringReason" v-model="wfhRequest.reason" class="form-control" rows="3" required></textarea>
                         </div>
                     </div>
 
@@ -295,7 +295,8 @@ export default {
             your_requests: [],
             wfh_request_error: '',
             selectedRequest: {},
-            showDatePicker: false
+            showDatePicker: false,
+            selectedDate: '', // New variable for the selected date
         }
     },
 
@@ -317,6 +318,12 @@ export default {
                 }
             }
         },
+        // updateDates() {
+        //     console.log('updateDates called');
+        //     this.wfhRequest.dates = [this.selectedDate]; // Set dates array with the selected date
+        //     console.log(this.selectedDate)
+        //     console.log(this.wfhRequest.dates)
+        // },
         addDate() {
             if (this.newDate && !this.wfhRequest.dates.includes(this.newDate)) {
                 this.wfhRequest.dates.push(this.newDate);
@@ -325,8 +332,16 @@ export default {
                 console.log(this.wfhRequest.dates);
             }
         },
+        
+        // // NEW validate
         validateWfhRequest() {
-            // Logic to validate WFH request
+            if (this.wfhRequest.date != '')
+                this.wfhRequest.dates = [this.wfhRequest.date];
+                console.log(this.wfhRequest.dates)
+            const requestPayload = {
+                ...this.wfhRequest,
+                dates: this.wfhRequest.dates.map(date => new Date(date).toISOString()), // Convert to ISO format
+            };
             axios.post("http://127.0.0.1:5000/wfh_request/validate", this.wfhRequest)
             .then(response => {
                 if (response.data.valid) {
@@ -336,30 +351,58 @@ export default {
                         this.submitWfhRequest(null)
                     }
                 } else {
-                    window.alert(response.data.message)
-                    this.wfh_request_error = response.data.message
+                    // Join messages into a single alert
+                    const errorMessage = response.data.message.join('\n');
+                    window.alert(errorMessage);
+                    this.wfh_request_error = errorMessage;
                 }
             })
             .catch(error => {
-                console.log(error)
-            })
+                console.log(error);
+            });
         },
+
+        // // OLD validate
+        // validateWfhRequest() {
+        //     // Logic to validate WFH request
+        //     axios.post("http://127.0.0.1:5000/wfh_request/validate", this.wfhRequest)
+        //     .then(response => {
+        //         if (response.data.valid) {
+        //             if (response.data.message) {
+        //                 this.submitWfhRequest(response.data.message)
+        //             }
+        //             this.submitWfhRequest(null)
+        //         } else {
+        //             window.alert(response.data.message)
+        //             this.wfh_request_error = response.data.message
+        //         }
+        //     })
+        //     .catch(error => {
+        //         console.log(error)
+        //     })
+        // },
         submitWfhRequest(message) {
+            console.log(this.wfhRequest.date)
+            if (this.wfhRequest.date != '')
+                this.wfhRequest.dates = [this.wfhRequest.date];
+                console.log(this.wfhRequest.dates)
             const requestPayload = {
                 ...this.wfhRequest,
                 dates: this.wfhRequest.dates.map(date => new Date(date).toISOString()), // Convert to ISO format
             };
 
             // Logic to submit WFH request
-            axios.post("http://127.0.0.1:5000/wfh_request", this.wfhRequest)
+            axios.post("http://127.0.0.1:5000/wfh_request", requestPayload)
             .then(response => {
                 console.log(response.data)
+                console.log(response.status)
                 if (response.status == 201) {
                     if (message === null) {
                         window.alert('Request submitted successfully!')
                         this.alertSupervisor()
                     } else {
                         window.alert(message)
+                        this.alertSupervisor()
                     }
                     // Reset form after submission
                     this.wfhRequest = {
@@ -377,7 +420,8 @@ export default {
                 }
             })
             .catch(error => {
-                window.alert(error.response.data.error)
+                const errorMessage = error.response ? error.response.data.error : 'An unexpected error occurred';
+                window.alert(errorMessage);
             })
         },
         alertSupervisor() {
