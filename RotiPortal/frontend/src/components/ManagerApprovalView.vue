@@ -1,22 +1,22 @@
 <template>
-    <h2 class="mb-4">Manager Approval Dashboard</h2>
-        <!-- Filter Section -->
-        <div class="row mb-4">
-            <div class="col-md-6">
-                <label for="statusFilter" class="form-label">Filter by Status:</label>
-                <select id="statusFilter" v-model="statusFilter" class="form-select">
-                    <option value="">All</option>
-                    <option value="Pending">Pending</option>
-                    <option value="Approved">Approved</option>
-                    <option value="Rejected">Rejected</option>
-                </select>
-            </div>
-
-            <div class="col-md-6">
-                <label for="teamMemberFilter" class="form-label">Filter by Team Member:</label>
-                <input id="teamMemberFilter" v-model="teamMemberFilter" class="form-control" placeholder="Enter team member name">
-            </div>
+    <!-- <h2 class="mb-4">Manager Approval Dashboard</h2> -->
+    <!-- Filter Section -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <label for="statusFilter" class="form-label">Filter by Status:</label>
+            <select id="statusFilter" v-model="statusFilter" class="form-select">
+                <option value="">All</option>
+                <option value="Pending">Pending</option>
+                <option value="Approved">Approved</option>
+                <option value="Rejected">Rejected</option>
+            </select>
         </div>
+
+        <div class="col-md-6">
+            <label for="teamMemberFilter" class="form-label">Filter by Team Member:</label>
+            <input id="teamMemberFilter" v-model="teamMemberFilter" class="form-control" placeholder="Enter team member name">
+        </div>
+    </div>
 
     <!-- Requests Table -->
     <div class="card">
@@ -134,7 +134,10 @@ export default {
             actionType: '',             // To store whether it's 'approve' or 'reject'
             requestId: null,            // Store the request ID for the selected action
             comment: '',                // Store the comment input from the user
-            selectedRequest: {}
+            selectedRequest: {},
+
+            // delegate data
+            delegateData: {}
         }
     },
     computed: {
@@ -210,13 +213,13 @@ export default {
 
                 // Submit the comment and status update
                 if (this.actionType === 'approve') {
-                    this.approveRequest(this.requestId, this.comment);
+                    this.approveRequest(this.requestId, this.comment, this.employee_obj.Staff_FName + " " + this.employee_obj.Staff_LName);
                     window.alert('Request approved successfully!')
                     // this.alertStaff(staffID, startDate, endDate, shift, actionType)
                     this.alertStaff(staffID, date, shift, actionType)
                     this.$forceUpdate()
                 } else if (this.actionType === 'reject') {
-                    this.rejectRequest(this.requestId, this.comment);
+                    this.rejectRequest(this.requestId, this.comment, this.employee_obj.Staff_FName + " " + this.employee_obj.Staff_LName);
                     window.alert('Request rejected successfully!')
                     // this.alertStaff(staffID, startDate, endDate, shift, actionType)
                     this.alertStaff(staffID, date, shift, actionType)
@@ -236,10 +239,11 @@ export default {
                 console.log(error)
             })
         },
-        approveRequest(requestId, comment) {
+        approveRequest(requestId, comment, approving_manager) {
             const payload = {
                 status: 'Approved',
-                comment: comment
+                comment: comment,
+                approving_manager: approving_manager
             };
 
             // Make the API call to update the status in the backend
@@ -257,10 +261,11 @@ export default {
                     }
                 });
         },
-        rejectRequest(requestId, comment) {
+        rejectRequest(requestId, comment, approving_manager) {
             const payload = {
                 status: 'Rejected', // Change the status to Rejected
-                comment: comment    // Add the comment
+                comment: comment,    // Add the comment
+                approving_manager: approving_manager
             };
 
             // Find the index of the request in your local data
@@ -331,15 +336,28 @@ export default {
                 }
             }
         },
-        async fetchEmployeeData() {
-            axios.get(`http://127.0.0.1:5000/employee/manager/${this.employee_obj.Staff_ID}`)
-            .then(response => {
-                this.employees = response.data
-                this.fetchEmployeeRequests()
-            })
-            .catch(error => {
-                console.log(error)
-            })
+        // async fetchEmployeeData(staff_id) {
+        //     axios.get(`http://127.0.0.1:5000/employee/manager/${staff_id}`)
+        //     .then(response => {
+        //         this.employees = response.data
+        //         this.fetchEmployeeRequests()
+        //     })
+        //     .catch(error => {
+        //         console.log(error)
+        //     })
+        // },
+
+        // takes in a list of staff_ids
+        async fetchEmployeeData(staff_id_list) {
+            for (const staff_id of staff_id_list) {
+                try {
+                    const response = await axios.get(`http://127.0.0.1:5000/employee/manager/${staff_id}`)
+                    this.employees.push(...response.data)
+                } catch (error) {
+                    console.log(error)
+                }
+            }
+            this.fetchEmployeeRequests()
         },
         async fetchEmployeeRequests() {
             for (const employee of this.employees) {
@@ -356,11 +374,49 @@ export default {
         formatDateToDD_MMM_YYYY(dateString) {
             const date = new Date(dateString);
             return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+        },
+        isDelegate(staff_id) {
+            // check if the staff_id exists in the delegate collection
+            axios.get(`http://127.0.0.1:5000/delegate/${staff_id}`)
+            .then(response => {
+                // if it does, fetch the delegate data
+                this.delegateData = response.data
+                const today = new Date();
+                const startDate = new Date(this.delegateData.start_date);
+                const endDate = new Date(this.delegateData.end_date);
+                
+                // check if the delegation is within the date range
+                if (today >= startDate && today <= endDate) {
+                    console.log("Delegation valid (within date range)");
+                    this.fetchEmployeeData([this.delegateData.manager_id, staff_id])
+                } else {
+                    console.log("Delegation invalid (not within date range)")
+                    this.fetchEmployeeData([staff_id])
+                }
+            })
+            // if the staff_id does not exist in the delegate collection, 
+            // fetch the employee data of employees under this manager
+            .catch(error => {
+                console.log("This employee is not a delegate.")
+                this.fetchEmployeeData([staff_id])
+                
+            })
+        },
+        cleanupExpiredDelegates() {
+            axios.delete('http://127.0.0.1:5000/delegate/cleanup')
+            .then(response => {
+                console.log(response.data.message)
+            })
+            .catch(error => {
+                console.log(error)
+            })
         }
     },
     mounted() {
         this.employee_obj = JSON.parse(sessionStorage.getItem("employee_obj"))
-        this.fetchEmployeeData()
+        this.cleanupExpiredDelegates()
+        this.isDelegate(this.employee_obj.Staff_ID)
+        // this.fetchEmployeeData()
     }
 }
 

@@ -169,6 +169,18 @@
                                 <th>Status:</th>
                                 <td>{{ selectedRequest.status }}</td>
                             </tr>
+                            <tr v-if="selectedRequest.status === 'Approved' || selectedRequest.status === 'Rejected'">
+                                <th>Comment:</th>
+                                <td>{{ selectedRequest.comment }}</td>
+                            </tr>
+                            <tr v-if="selectedRequest.status === 'Approved'">
+                                <th>Approved By:</th>
+                                <td>{{ selectedRequest.approving_manager }}</td>
+                            </tr>
+                            <tr v-if="selectedRequest.status === 'Rejected'">
+                                <th>Rejected By:</th>
+                                <td>{{ selectedRequest.approving_manager }}</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -288,7 +300,8 @@ export default {
                 recurringReason: '',
                 attachments: null,
                 status: 'Pending',
-                dates: [], // New property for multiple dates
+                dates: [],
+                approving_manager: ''
             },
             newDate: '', // New variable to hold the single date from the date picker
             dates: [], // Options for the multiselect
@@ -302,12 +315,43 @@ export default {
 
     computed: {
         sortedYourRequests() {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0); // Set to start of day for accurate comparison
+        // const today = new Date();
+        // today.setHours(0, 0, 0, 0); // Set to start of day for accurate comparison
         
-        return [...this.your_requests]
-            .filter(request => new Date(request.date) >= today && request.status !== 'Withdrawn') // Exclude withdrawn requests
-            .sort((a, b) => new Date(a.date) - new Date(b.date));
+        // return [...this.your_requests]
+        //     .filter(request => new Date(request.date) >= today && request.status !== 'Withdrawn') // Exclude withdrawn requests
+        //     .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+        const today = new Date();
+            today.setHours(0, 0, 0, 0); // Set to the start of the day for accurate comparison
+
+            const isWithin24Hours = (requestDate) => {
+                let approvalDate = new Date(requestDate);
+                approvalDate.setDate(approvalDate.getDate() - 1); // 24 hours before the request date
+                
+                let daysToSubtract = 0;
+                // Adjust for weekends (skip Saturday and Sunday)
+                if (approvalDate.getDay() === 0) { // Sunday
+                    daysToSubtract = 2;
+                } else if (approvalDate.getDay() === 6) { // Saturday
+                    daysToSubtract = 1;
+                }
+                approvalDate.setDate(approvalDate.getDate() - daysToSubtract);
+
+                return today > approvalDate; // Can only approve/reject if today is greater than the adjusted approval date
+            };
+
+            const filtered = this.your_requests.filter(request => {
+                const requestDate = new Date(request.date);
+                const dateMatch = !isWithin24Hours(requestDate); // Ensure it's not within 24 hours considering the work week
+
+                return dateMatch;
+            });
+
+            return filtered.sort((a, b) => {
+                // sort by date (earliest first)
+                return new Date(a.date) - new Date(b.date);
+            });
     }
     },
     methods: {
@@ -666,9 +710,9 @@ input:checked + .slider:before {
 }
 
 /* Optional: Adjust button styles */
-.btn-secondary {
-    width: 100%; /* Make button full-width */
-}
+/* .btn-secondary {
+    width: 100%;
+} */
 
 /* Optional: Style for the multiselect */
 .multiselect {

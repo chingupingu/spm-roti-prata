@@ -24,7 +24,7 @@ class Employee:
 
 
 class WfhRequest:
-    def __init__(self, staff_id, date, shift, reason, recurring, attachment_url, status, comment=""):
+    def __init__(self, staff_id, date, shift, reason, recurring, attachment_url, status, comment="", approving_manager=""):
         self.staff_id = staff_id
         self.date = date
         self.shift = shift
@@ -32,7 +32,8 @@ class WfhRequest:
         self.recurring = recurring
         self.attachment_url = attachment_url
         self.status = status
-        self.comment = comment  # New field
+        self.comment = comment
+        self.approving_manager = approving_manager
 
     @staticmethod
     def __repr__(self):
@@ -44,5 +45,15 @@ class WfhRequest:
                 recurring={self.recurring}, \
                 attachment_url={self.attachment_url}, \
                 status={self.status}, \
-                comment={self.comment}\
+                comment={self.comment}, \
+                approving_manager={self.approving_manager}\
             )"
+
+class Delegate:
+    def __init__(self, manager_id, delegate_id, start_date, end_date, dept):
+        self.manager_id = manager_id
+        self.delegate_id = delegate_id
+        self.start_date = start_date
+        self.end_date = end_date
+        self.dept = dept
+

@@ -10,8 +10,7 @@ class WfhRequestService:
         self.employee_service = EmployeeService()
 
 
-    # NEW create_wfh_request
-    def create_wfh_request(self, staff_id: str, dates: list[str], shift: str, reason: str, recurring: bool, attachment_file, status: str, comment: str = "") -> str:
+    def create_wfh_request(self, staff_id: str, dates: list[str], shift: str, reason: str, recurring: bool, attachment_file, status: str, comment: str = "", approving_manager: str = "") -> str:
         successful_requests = []
         
         # Handle the attachment only if provided
@@ -42,6 +41,7 @@ class WfhRequestService:
                 attachment_url=attachment_url,
                 status=status,
                 comment=comment,
+                approving_manager=approving_manager
             )
             
             # Add the WFH request to the repository

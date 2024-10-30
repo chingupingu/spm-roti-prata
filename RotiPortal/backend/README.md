@@ -23,3 +23,10 @@ EDITING:
 - new service function:
     1. add the function in the respective service .py file
     2. configure new routes in routes.py
+
+MISC INFO:
+- user role 1: HR and senior mgmt
+- user role 2: normal staff
+- user role 3: manager and director
+
+- delegation: only role 1 and 3 can be given delegation
