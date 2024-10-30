@@ -250,7 +250,8 @@ export default {
             your_requests: [],
             wfh_request_error: '',
             selectedRequest: {},
-            showDatePicker: false
+            showDatePicker: false,
+            selectedDate: '', // New variable for the selected date
         }
     },
 
@@ -272,6 +273,12 @@ export default {
                 }
             }
         },
+        // updateDates() {
+        //     console.log('updateDates called');
+        //     this.wfhRequest.dates = [this.selectedDate]; // Set dates array with the selected date
+        //     console.log(this.selectedDate)
+        //     console.log(this.wfhRequest.dates)
+        // },
         addDate() {
             if (this.newDate && !this.wfhRequest.dates.includes(this.newDate)) {
                 this.wfhRequest.dates.push(this.newDate);
@@ -283,6 +290,13 @@ export default {
         
         // // NEW validate
         validateWfhRequest() {
+            if (this.wfhRequest.date != '')
+                this.wfhRequest.dates = [this.wfhRequest.date];
+                console.log(this.wfhRequest.dates)
+            const requestPayload = {
+                ...this.wfhRequest,
+                dates: this.wfhRequest.dates.map(date => new Date(date).toISOString()), // Convert to ISO format
+            };
             axios.post("http://127.0.0.1:5000/wfh_request/validate", this.wfhRequest)
             .then(response => {
                 if (response.data.valid) {
@@ -323,6 +337,10 @@ export default {
         //     })
         // },
         submitWfhRequest(message) {
+            console.log(this.wfhRequest.date)
+            if (this.wfhRequest.date != '')
+                this.wfhRequest.dates = [this.wfhRequest.date];
+                console.log(this.wfhRequest.dates)
             const requestPayload = {
                 ...this.wfhRequest,
                 dates: this.wfhRequest.dates.map(date => new Date(date).toISOString()), // Convert to ISO format

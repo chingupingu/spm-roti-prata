@@ -53,7 +53,7 @@ class WfhRequestService:
 
         # Check if all requests were successful
         if len(successful_requests) == len(dates):
-            return True  # Return True and list of request IDs
+            return True  # Return True
         else:
             return False, "Some requests could not be processed."  # Return failure message
 
@@ -122,11 +122,13 @@ class WfhRequestService:
     #     return (True, "")
 
     def validate_wfh_request(self, staff_id: str, dates: list[str]) -> tuple[bool, list[str]]:
+        import pytz
         messages = []
         valid = True
 
         for date in dates:
             # Extract just the date part if a full datetime string is provided
+            date_to_format_later = date
             date = date.split('T')[0]
             
             # Convert the date string to a datetime object
@@ -144,16 +146,43 @@ class WfhRequestService:
 
             # Check if there are already 2 or more WFH requests for the week
             if len(week_requests) >= 2:
-                messages.append("You have exceeded the maximum of 2 WFH requests per week for the week of " + date)
+                # Original ISO 8601 date string
+                iso_date = date_to_format_later
+
+                # Convert to a datetime object in UTC
+                dt_utc = datetime.fromisoformat(iso_date[:-1])  # Remove the 'Z' for compatibility
+                dt_utc = dt_utc.replace(tzinfo=pytz.utc)  # Set timezone to UTC
+
+                # Convert to Singapore timezone
+                singapore_tz = pytz.timezone('Asia/Singapore')
+                dt_singapore = dt_utc.astimezone(singapore_tz)
+
+                # Format to dd-mm-yyyy
+                formatted_date = dt_singapore.strftime("%d-%m-%Y")
+                messages.append("You have exceeded the maximum of 2 WFH requests per week for the week of " + formatted_date)
                 valid = False
-                continue
 
             # Check if there's already a WFH request for the same day
             same_day_requests = [req for req in week_requests if req['date'].split('T')[0] == date]
             if same_day_requests:
-                messages.append("You already have a WFH request for this day: " + date)
+                # Original ISO 8601 date string
+                iso_date = date_to_format_later
+
+                # Convert to a datetime object in UTC
+                dt_utc = datetime.fromisoformat(iso_date[:-1])  # Remove the 'Z' for compatibility
+                dt_utc = dt_utc.replace(tzinfo=pytz.utc)  # Set timezone to UTC
+
+                # Convert to Singapore timezone
+                singapore_tz = pytz.timezone('Asia/Singapore')
+                dt_singapore = dt_utc.astimezone(singapore_tz)
+
+                # Format to dd-mm-yyyy
+                formatted_date = dt_singapore.strftime("%d-%m-%Y")
+                messages.append("You already have a WFH request for this day: " + formatted_date)
                 valid = False
-                continue
+        
+        if (messages == []):
+            messages = ""
 
         if valid:
             return (True, messages)
@@ -170,16 +199,48 @@ class WfhRequestService:
         reporting_manager_id = employee_object.Reporting_Manager
         reporting_manager_object = self.employee_service.get_employee(reporting_manager_id)
         reporting_manager_name = reporting_manager_object.Staff_FName + " " + reporting_manager_object.Staff_LName
-        recurring = True
+        if len(dates) == 1:
+            # Non-recurring
+            date = dates[0]
+            recurring = False
+        else:
+            # Recurring
+            recurring = True
 
         if shift == "FD":
             shift = "Full Day"
 
         # If non-recurring
-        if (len(dates) == 1):
-            recurring = False
-            date = dates[0]
+        if (not recurring):
+            # Original ISO 8601 date string
+            iso_date = date
+
+            # Convert to a datetime object in UTC
+            dt_utc = datetime.fromisoformat(iso_date[:-1])  # Remove the 'Z' for compatibility
+            dt_utc = dt_utc.replace(tzinfo=pytz.utc)  # Set timezone to UTC
+
+            # Convert to Singapore timezone
+            singapore_tz = pytz.timezone('Asia/Singapore')
+            dt_singapore = dt_utc.astimezone(singapore_tz)
+
+            # Format to dd-mm-yyyy
+            formatted_date = dt_singapore.strftime("%d-%m-%Y")
         # Additional logic for processing the non-recurring will go here...
+            message = f"""Subject: New WFH Request from {employee_name}
+
+Hi {reporting_manager_name},
+
+    This email is to inform you of a new work-from-home request submitted by {employee_name}.
+
+    Request Details:
+    - Date to WFH: {formatted_date}
+    - Shift: {shift}
+    - Reason: {reason}
+
+    Please review and respond accordingly.
+
+Thank you,
+WFH System"""
 
         # If recurring
         if (recurring):
@@ -215,7 +276,7 @@ Hi {reporting_manager_name},
 
 Thank you,
 WFH System"""
-            self.send_email("innocentstriker1@gmail.com", message)
+        self.send_email("innocentstriker1@gmail.com", message)
 
 
     # Old alert_supervisor method
