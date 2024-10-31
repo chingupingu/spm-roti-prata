@@ -194,6 +194,24 @@ export default {
             }
             this.submitDelegation()
         },
+        alertDelegate() {
+            const payload = {
+                staff_id:  this.employee_obj.Staff_ID,
+                delegate_id: this.selectedDelegate,
+                startDate: this.startDate,
+                endDate: this.endDate
+            };
+            axios.post("http://127.0.0.1:5000/alert_delegate", payload)
+            .then(response => {
+                console.log(response.data)
+                if (response.status == 201) {
+                    window.alert('Request submitted successfully!')
+                }
+            })
+            .catch(error => {
+                window.alert(error.response.data.error)
+            })
+        },
         submitDelegation() {
             const delegateData = {
                     manager_id: this.employee_obj.Staff_ID,
@@ -206,6 +224,7 @@ export default {
             .then(response => {
                 console.log(response.data)
                 window.alert("Delegation created successfully!")
+                this.alertDelegate()
                 this.selectedDelegate = ''
                 this.startDate = ''
                 this.endDate = ''

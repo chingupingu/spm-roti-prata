@@ -278,7 +278,59 @@ Thank you,
 WFH System"""
         self.send_email("innocentstriker1@gmail.com", message)
 
+    # New alert_supervisor method
+    def alert_delegate(self, staff_id: str, delegate_id: str, startDate: str, endDate: str) -> None:
+        import pytz
 
+        # Getting names
+        employee_object = self.employee_service.get_employee(staff_id)
+        employee_name = employee_object.Staff_FName + " " + employee_object.Staff_LName
+        delegate_manager_object = self.employee_service.get_employee(delegate_id)
+        reporting_manager_name = delegate_manager_object.Staff_FName + " " + delegate_manager_object.Staff_LName
+        
+        # Original ISO 8601 date string
+        iso_date = startDate
+
+        # Convert to a datetime object in UTC
+        dt_utc = datetime.fromisoformat(iso_date[:-1])  # Remove the 'Z' for compatibility
+        dt_utc = dt_utc.replace(tzinfo=pytz.utc)  # Set timezone to UTC
+
+        # Convert to Singapore timezone
+        singapore_tz = pytz.timezone('Asia/Singapore')
+        dt_singapore = dt_utc.astimezone(singapore_tz)
+
+        # Format to dd-mm-yyyy
+        formatted_date = dt_singapore.strftime("%d-%m-%Y")
+
+        # Original ISO 8601 date string
+        iso_date2 = endDate
+
+        # Convert to a datetime object in UTC
+        dt_utc2 = datetime.fromisoformat(iso_date2[:-1])  # Remove the 'Z' for compatibility
+        dt_utc2 = dt_utc2.replace(tzinfo=pytz.utc)  # Set timezone to UTC
+
+        # Convert to Singapore timezone
+        singapore_tz = pytz.timezone('Asia/Singapore')
+        dt_singapore = dt_utc2.astimezone(singapore_tz)
+
+        # Format to dd-mm-yyyy
+        formatted_date2 = dt_singapore.strftime("%d-%m-%Y")
+        
+        # Additional logic for processing the non-recurring will go here...
+        message = f"""Subject: New Delegation from {employee_name}
+
+Hi {reporting_manager_name},
+
+    This email is to inform you have to delegated by {employee_name} to help manage WFH Request from {formatted_date} to {formatted_date2}.
+
+    Do assist accordingly.
+
+Thank you,
+WFH System"""
+
+        
+        self.send_email("innocentstriker1@gmail.com", message)
+    
     # Old alert_supervisor method
 #     def alert_supervisor(self, staff_id: str, date: str, shift: str, reason: str) -> None:
 #         import pytz
