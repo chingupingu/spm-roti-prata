@@ -154,7 +154,7 @@
 
       const period = entry.shift === 'FD' ? ['AM', 'PM'] : [entry.shift];
 
-      const arrangement = entry.status === 'Withdrawn' || 'Cancelled'
+      const arrangement = (entry.status === 'Withdrawn' || entry.status === 'Cancelled')
       ? { arrangement: 'Work from Office', status: 'Approved' }
       : { arrangement: 'Work from Home', status: entry.status };
 
