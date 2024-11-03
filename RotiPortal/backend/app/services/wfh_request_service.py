@@ -160,7 +160,7 @@ class WfhRequestService:
                 # Format to dd-mm-yyyy
                 formatted_date = dt_singapore.strftime("%d-%m-%Y")
                 messages.append("You have exceeded the maximum of 2 WFH requests per week for the week of " + formatted_date)
-                valid = False
+                valid = True
 
             # Check if there's already a WFH request for the same day
             same_day_requests = [req for req in week_requests if req['date'].split('T')[0] == date]
@@ -402,15 +402,12 @@ WFH System"""
 
 
     # def alert_staff(self, staffID: str, startDate: str, endDate: str, actionType: str) -> None:
-    def alert_staff(self, staffID: str, date: str, shift: str, actionType: str) -> None:
+    def alert_staff(self, staffID: str, date: str, shift: str, actionType: str, approving_manager: str) -> None:
 
         import pytz
 
         employee_object = self.employee_service.get_employee(staffID)
         employee_name = employee_object.Staff_FName + " " + employee_object.Staff_LName
-        reporting_manager_id = employee_object.Reporting_Manager
-        reporting_manager_object = self.employee_service.get_employee(reporting_manager_id)
-        reporting_manager_name = reporting_manager_object.Staff_FName + " " + reporting_manager_object.Staff_LName
         
         if actionType == "approve":
             actionType = "approved"
@@ -439,7 +436,7 @@ WFH System"""
 
 Hi {employee_name},
 
-    This email is to inform you that your WFH request for {formatted_date} for {shift} shift has been {actionType} by {reporting_manager_name}.
+    This email is to inform you that your WFH request for {formatted_date} for {shift} shift has been {actionType} by {approving_manager}.
 
 
 Thank you,

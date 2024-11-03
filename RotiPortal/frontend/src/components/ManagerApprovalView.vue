@@ -216,13 +216,13 @@ export default {
                     this.approveRequest(this.requestId, this.comment, this.employee_obj.Staff_FName + " " + this.employee_obj.Staff_LName);
                     window.alert('Request approved successfully!')
                     // this.alertStaff(staffID, startDate, endDate, shift, actionType)
-                    this.alertStaff(staffID, date, shift, actionType)
+                    this.alertStaff(staffID, date, shift, actionType, this.employee_obj.Staff_FName + " " + this.employee_obj.Staff_LName)
                     this.$forceUpdate()
                 } else if (this.actionType === 'reject') {
                     this.rejectRequest(this.requestId, this.comment, this.employee_obj.Staff_FName + " " + this.employee_obj.Staff_LName);
                     window.alert('Request rejected successfully!')
                     // this.alertStaff(staffID, startDate, endDate, shift, actionType)
-                    this.alertStaff(staffID, date, shift, actionType)
+                    this.alertStaff(staffID, date, shift, actionType, this.employee_obj.Staff_FName + " " + this.employee_obj.Staff_LName)
                     this.$forceUpdate()
                 }
             }
@@ -293,7 +293,7 @@ export default {
                 });
         },
 
-        alertStaff(staffID, date, shift, actionType) {
+        alertStaff(staffID, date, shift, actionType, approving_manager) {
         // alertStaff(staffID, startDate, endDate, actionType) {
             const payload = {
             staffID: staffID,
@@ -301,7 +301,8 @@ export default {
             // endDate: endDate,      // End date for the alert
             date: date,
             shift: shift,
-            actionType: actionType  // Action type (approve or reject)
+            actionType: actionType,  // Action type (approve or reject)
+            approving_manager: approving_manager
             }
 
             axios.post("http://127.0.0.1:5000/wfh_request_update_alert", payload)

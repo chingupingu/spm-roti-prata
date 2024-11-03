@@ -170,7 +170,7 @@ export default {
         async fetchExistingDelegates() {
             axios.get('http://127.0.0.1:5000/delegate')
             .then(response => {
-                this.existingDelegates = response.data
+                this.existingDelegates = response.data.filter(delegate => delegate.manager_id === this.employee_obj.Staff_ID)
                 console.log(this.existingDelegates)
             })
             .catch(error => {

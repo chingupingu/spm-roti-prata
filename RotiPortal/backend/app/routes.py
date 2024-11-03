@@ -121,8 +121,9 @@ def register_routes(app):
         date = data.get('date')
         shift = data.get('shift')
         actionType = data.get("actionType")
+        approving_manager = data.get("approving_manager")
         # wfh_request_service.alert_staff(staffID, startDate, endDate, actionType)
-        wfh_request_service.alert_staff(staffID, date, shift, actionType)
+        wfh_request_service.alert_staff(staffID, date, shift, actionType, approving_manager)
 
         return jsonify({"message": "Staff alerted successfully."}), 200
     
@@ -233,21 +234,21 @@ def register_routes(app):
         delegates = delegate_service.get_all_delegates()
         return jsonify(delegates)
 
-    @app.route('/delegate/<int:delegate_id>', methods=['GET'])
+    @app.route('/delegate/<delegate_id>', methods=['GET'])
     def get_delegate_by_delegate_id(delegate_id):
         delegate = delegate_service.get_delegate_by_delegate_id(delegate_id)
         if delegate:
             return jsonify(delegate)
         return jsonify({'error': 'delegation not found'}), 404
     
-    @app.route('/delegate/manager/<int:manager_id>', methods=['GET'])
+    @app.route('/delegate/manager/<manager_id>', methods=['GET'])
     def get_delegate_by_manager_id(manager_id):
         delegate = delegate_service.get_delegate_by_manager_id(manager_id)
         if delegate:
             return jsonify(delegate)
         return jsonify({'error': 'delegation not found'}), 404
     
-    @app.route('/delegate/<int:delegate_id>', methods=['PUT'])
+    @app.route('/delegate/<delegate_id>', methods=['PUT'])
     def update_delegate(delegate_id):
         data = request.json
         delegate_service.update_delegate(delegate_id, data)
