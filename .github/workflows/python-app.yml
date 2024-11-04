@@ -49,3 +49,6 @@ jobs:
       run: |
         export PYTHONPATH=$PWD/RotiPortal/backend
         python -m pytest RotiPortal/backend/app/tests
+    - name: Debug Environment Variables
+      run: |
+        echo "GOOGLE_APPLICATION_CREDENTIALS: $GOOGLE_APPLICATION_CREDENTIALS"
