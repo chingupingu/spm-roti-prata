@@ -44,11 +44,11 @@ jobs:
         flake8 RotiPortal/backend/app --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --ignore=F821
     - name: Run unit tests
       env:
-        GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.SERVICE_ACCOUNT_KEY }}
+        GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
         # GOOGLE_APPLICATION_CREDENTIALS: /tmp/serviceAccountKey.json
       run: |
         export PYTHONPATH=$PWD/RotiPortal/backend
         python -m pytest RotiPortal/backend/app/tests
-    - name: Debug Environment Variables
-      run: |
-        echo "GOOGLE_APPLICATION_CREDENTIALS: $GOOGLE_APPLICATION_CREDENTIALS"
+    # - name: Debug Environment Variables
+    #   run: |
+    #     echo "GOOGLE_APPLICATION_CREDENTIALS: $GOOGLE_APPLICATION_CREDENTIALS"

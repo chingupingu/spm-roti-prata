@@ -15,21 +15,27 @@ def create_app(service_account_json):
     CORS(app)  # Enable CORS for all routes
     app.config.from_object('app.config.Config')
 
-    if service_account_json is None:
-        if not firebase_initialized:
-            # Use the credentials from the environment variable
-            cred = credentials.Certificate(os.getenv('GOOGLE_APPLICATION_CREDENTIALS'))
-            initialize_app(cred, {
-                "storageBucket": "gs://roti-portal-392216.appspot.com"
-            })
-            firebase_initialized = True
-    else:
-        if not firebase_initialized:
-            cred = service_account.Credentials.from_service_account_info(service_account_json)
-            initialize_app(cred, {
-                "storageBucket": "gs://roti-portal-392216.appspot.com"
-            })
-            firebase_initialized = True
+    # Initialize Firebase app
+    cred = credentials.Certificate(os.getenv('GOOGLE_APPLICATION_CREDENTIALS'))
+    initialize_app(cred, {
+        "storageBucket": "gs://roti-portal-392216.appspot.com"
+    })
+
+    # if service_account_json is None:
+    #     if not firebase_initialized:
+    #         # Use the credentials from the environment variable
+    #         cred = credentials.Certificate(os.getenv('GOOGLE_APPLICATION_CREDENTIALS'))
+    #         initialize_app(cred, {
+    #             "storageBucket": "gs://roti-portal-392216.appspot.com"
+    #         })
+    #         firebase_initialized = True
+    # else:
+    #     if not firebase_initialized:
+    #         cred = service_account.Credentials.from_service_account_info(service_account_json)
+    #         initialize_app(cred, {
+    #             "storageBucket": "gs://roti-portal-392216.appspot.com"
+    #         })
+    #         firebase_initialized = True
 
     # Initialize Firestore
     db = firestore.Client()
