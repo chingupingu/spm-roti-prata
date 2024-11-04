@@ -6,7 +6,7 @@ from google.oauth2 import service_account
 from dotenv import load_dotenv
 firebase_initialized = False
 
-def create_app(TESTING_CREDENTIALS=None):
+def create_app(service_account_json):
     global firebase_initialized
     # Load environment variables from .env
     load_dotenv()
@@ -15,7 +15,7 @@ def create_app(TESTING_CREDENTIALS=None):
     CORS(app)  # Enable CORS for all routes
     app.config.from_object('app.config.Config')
 
-    if TESTING_CREDENTIALS is None:
+    if service_account_json is None:
         if not firebase_initialized:
             # Use the credentials from the environment variable
             cred = credentials.Certificate(os.getenv('GOOGLE_APPLICATION_CREDENTIALS'))
@@ -25,7 +25,7 @@ def create_app(TESTING_CREDENTIALS=None):
             firebase_initialized = True
     else:
         if not firebase_initialized:
-            cred = service_account.Credentials.from_service_account_info(TESTING_CREDENTIALS)
+            cred = service_account.Credentials.from_service_account_info(service_account_json)
             initialize_app(cred, {
                 "storageBucket": "gs://roti-portal-392216.appspot.com"
             })
