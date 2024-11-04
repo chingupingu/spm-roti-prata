@@ -3,7 +3,10 @@
     "builds": [
     {
       "src": "RotiPortal/backend/run.py",
-      "use": "@vercel/python"
+      "use": "@vercel/python",
+      "config": {
+        "pythonVersion": "3.9"
+      }
     },
     {
       "src": "RotiPortal/frontend/dist/index.html",
@@ -12,20 +15,12 @@
   ],
   "routes": [
     {
-      "src": "/backend/(.*)",
+      "src": "/api/(.*)",
       "dest": "RotiPortal/backend/run.py"
     },
     {
-      "src": "/home",
-      "dest": "RotiPortal/frontend/dist/index.html"
-    },
-    {
-      "src": "/",
-      "dest": "RotiPortal/frontend/dist/index.html"
-    },
-    {
       "src": "/(.*)",
-      "dest": "RotiPortal/frontend/dist/index.html"
+      "dest": "RotiPortal/frontend/dist/$1"
     }
   ]
 }
