@@ -7,15 +7,15 @@
     },
     {
       "src": "/home",
-      "dest": "RotiPortal/frontend/index.html"
+      "dest": "RotiPortal/frontend/dist/index.html"
     },
     {
       "src": "/",
-      "dest": "RotiPortal/frontend/index.html"
+      "dest": "RotiPortal/frontend/dist/index.html"
     },
     {
       "src": "/(.*)",
-      "dest": "RotiPortal/frontend/index.html"
+      "dest": "RotiPortal/frontend/dist/index.html"
     }
   ]
 }
