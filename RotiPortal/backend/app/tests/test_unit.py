@@ -28,11 +28,10 @@ class TestRoutes(unittest.TestCase):
         # self.client = self.app.test_client()
         # self.app.testing = True
         load_dotenv(find_dotenv())
-        encoded_key = os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
-        if encoded_key is None:
+        if os.getenv('GOOGLE_APPLICATION_CREDENTIALS') is None:
             raise ValueError("GOOGLE_APPLICATION_CREDENTIALS environment variable is not set")
         
-        GOOGLE_APPLICATION_CREDENTIALS = json.loads(base64.b64decode(encoded_key).decode('utf-8'))
+        # Initialize the app with the credentials
         self.app = create_app()
         self.client = self.app.test_client()
         self.app.testing = True
