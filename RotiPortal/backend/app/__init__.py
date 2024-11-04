@@ -2,6 +2,7 @@ import os
 from flask import Flask
 from flask_cors import CORS
 from firebase_admin import credentials, initialize_app, firestore
+from google.oauth2 import service_account
 from dotenv import load_dotenv
 firebase_initialized = False
 
@@ -24,7 +25,7 @@ def create_app(TESTING_CREDENTIALS=None):
             firebase_initialized = True
     else:
         if not firebase_initialized:
-            cred = credentials.Certificate(TESTING_CREDENTIALS)
+            cred = service_account.Credentials.from_service_account_info(TESTING_CREDENTIALS)
             initialize_app(cred, {
                 "storageBucket": "gs://roti-portal-392216.appspot.com"
             })
