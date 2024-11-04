@@ -3,13 +3,21 @@
   "builds": [
     {
       "src": "RotiPortal/backend/run.py",
-      "use": "@vercel/python"
+      "use": "@vercel/python",
+      "config": {
+        "pythonVersion": "3.9",
+        "maxLambdaSize": "15mb"
+      }
     }
   ],
   "routes": [
     {
-      "src": "/api/(.*)", 
-      "dest": "RotiPortal/backend/routes.py"
+      "src": "/(.*)",
+      "dest": "RotiPortal/backend/run.py"
     }
-  ]
+  ],
+  "env": {
+    "FLASK_APP": "run.py",
+    "FLASK_ENV": "production"
+  }
 }
