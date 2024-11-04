@@ -2,20 +2,20 @@
   "version": 2,
   "routes": [
     {
-      "src": "/(.*)",
+      "src": "/backend/(.*)",
       "dest": "RotiPortal/backend/run.py"
     },
     {
       "src": "/home",
-      "dest": "RotiPortal/frontend/dist/index.html"
+      "dest": "RotiPortal/frontend/index.html"
     },
     {
       "src": "/",
-      "dest": "RotiPortal/frontend/dist/index.html"
+      "dest": "RotiPortal/frontend/index.html"
     },
     {
       "src": "/(.*)",
-      "dest": "RotiPortal/frontend/dist/index.html"
+      "dest": "RotiPortal/frontend/index.html"
     }
   ]
 }
