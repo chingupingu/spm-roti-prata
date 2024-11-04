@@ -3,32 +3,13 @@
   "builds": [
     {
       "src": "RotiPortal/backend/run.py",
-      "use": "@vercel/python",
-      "config": {
-        "pythonVersion": "3.9"
-      }
+      "use": "@vercel/python"
     }
   ],
   "routes": [
     {
-      "src": "/employee",
-      "dest": "RotiPortal/backend/run.py"
-    },
-    {
-      "src": "/employee/(.*)",
-      "dest": "RotiPortal/backend/run.py"
-    },
-    {
-      "src": "/wfh_request/(.*)",
-      "dest": "RotiPortal/backend/run.py"
-    },
-    {
-      "src": "/delegate/(.*)",
-      "dest": "RotiPortal/backend/run.py"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "RotiPortal/backend/run.py"
+      "src": "/api/(.*)", 
+      "dest": "RotiPortal/backend/routes.py"
     }
   ]
 }
