@@ -2,9 +2,6 @@ import json
 import unittest
 from unittest.mock import patch, Mock
 from app import create_app
-import os
-import base64
-from dotenv import load_dotenv, find_dotenv
 
 class MockEmployee:
     def __init__(self, staff_id, first_name, last_name, dept, position):
@@ -24,14 +21,6 @@ class MockWfhRequest:
 
 class TestRoutes(unittest.TestCase):
     def setUp(self):
-        # self.app = create_app()
-        # self.client = self.app.test_client()
-        # self.app.testing = True
-        
-        # load_dotenv(find_dotenv())
-        # if os.getenv('GOOGLE_APPLICATION_CREDENTIALS') is None:
-        #     raise ValueError("GOOGLE_APPLICATION_CREDENTIALS environment variable is not set")
-        
         # Initialize the app with the credentials
         self.app = create_app()
         self.client = self.app.test_client()
