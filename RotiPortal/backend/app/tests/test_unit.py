@@ -30,7 +30,7 @@ class TestRoutes(unittest.TestCase):
         load_dotenv(find_dotenv())
         encoded_key = os.getenv('SERVICE_ACCOUNT_KEY')
         SERVICE_ACCOUNT_JSON = json.loads(base64.b64decode(encoded_key).decode('utf-8'))
-        self.app = create_app(SERVICE_ACCOUNT_JSON)
+        self.app = create_app(SERVICE_ACCOUNT_JSON¬)
         self.client = self.app.test_client()
         self.app.testing = True
 
