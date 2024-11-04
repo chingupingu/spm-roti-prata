@@ -15,20 +15,21 @@ class WfhRequestService:
         
         # Handle the attachment only if provided
         attachment_url = None
-        if attachment_file:
-            # Upload attachments to Firebase storage
-            bucket = storage.bucket()
-            blob = bucket.blob(f"wfh_attachments/{staff_id}_{date}_{attachment_file.filename}")
-            blob.upload_from_string(
-                attachment_file.read(),
-                content_type=attachment_file.content_type
-            )
-            
-            # Make blob public
-            blob.make_public()
-            
-            # Get the public URL
-            attachment_url = blob.public_url
+        if not recurring:
+            if attachment_file:
+                # Upload attachments to Firebase storage
+                bucket = storage.bucket()
+                blob = bucket.blob(f"wfh_attachments/{staff_id}_{dates[0]}_{attachment_file.filename}")
+                blob.upload_from_string(
+                    attachment_file.read(),
+                    content_type=attachment_file.content_type
+                )
+                
+                # Make blob public
+                blob.make_public()
+                
+                # Get the public URL
+                attachment_url = blob.public_url
 
         # Iterate over each date
         for date in dates:
