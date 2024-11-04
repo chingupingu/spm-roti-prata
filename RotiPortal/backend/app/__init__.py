@@ -1,7 +1,7 @@
 import os
 from flask import Flask
 from flask_cors import CORS
-from firebase_admin import credentials, initialize_app, firestore
+from firebase_admin import credentials, initialize_app, firestore, get_app
 from google.oauth2 import service_account
 from dotenv import load_dotenv
 firebase_initialized = False
@@ -15,11 +15,20 @@ def create_app():
     CORS(app)  # Enable CORS for all routes
     app.config.from_object('app.config.Config')
 
-    # Initialize Firebase app
-    cred = credentials.Certificate(os.getenv('GOOGLE_APPLICATION_CREDENTIALS'))
-    initialize_app(cred, {
-        "storageBucket": "gs://roti-portal-392216.appspot.com"
-    })
+    # # Initialize Firebase app
+    # cred = credentials.Certificate(os.getenv('GOOGLE_APPLICATION_CREDENTIALS'))
+    # initialize_app(cred, {
+    #     "storageBucket": "gs://roti-portal-392216.appspot.com"
+    # })
+
+    try:
+        get_app()  # This will raise an exception if the app does not exist
+    except ValueError:
+        # Initialize Firebase app if it does not exist
+        initialize_app({
+            "storageBucket": "gs://roti-portal-392216.appspot.com"
+        })  # No need to pass credentials explicitly
+
 
     # if service_account_json is None:
     #     if not firebase_initialized:
