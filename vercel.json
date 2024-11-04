@@ -1,15 +1,5 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "RotiPortal/backend/run.py",
-      "use": "@vercel/python"
-    },
-    {
-      "src": "RotiPortal/frontend/index.html",
-      "use": "@vercel/static"
-    }
-  ],
   "routes": [
     {
       "src": "/(.*)",
