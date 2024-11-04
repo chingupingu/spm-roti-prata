@@ -8,10 +8,6 @@
   ],
   "routes": [
     {
-      "src": "/api/(.*)",
-      "dest": "RotiPortal/backend/run.py"
-    },
-    {
       "src": "/(.*)",
       "dest": "RotiPortal/frontend/dist/index.html"
     }
