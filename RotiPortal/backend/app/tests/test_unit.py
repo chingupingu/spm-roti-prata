@@ -2,6 +2,9 @@ import json
 import unittest
 from unittest.mock import patch, Mock
 from app import create_app
+import os
+import base64
+from dotenv import load_dotenv, find_dotenv
 
 class MockEmployee:
     def __init__(self, staff_id, first_name, last_name, dept, position):
@@ -21,7 +24,13 @@ class MockWfhRequest:
 
 class TestRoutes(unittest.TestCase):
     def setUp(self):
-        self.app = create_app()
+        # self.app = create_app()
+        # self.client = self.app.test_client()
+        # self.app.testing = True
+        load_dotenv(find_dotenv())
+        encoded_key = os.getenv('SERVICE_ACCOUNT_KEY')
+        SERVICE_ACCOUNT_JSON = json.loads(base64.b64decode(encoded_key).decode('utf-8'))
+        self.app = create_app(SERVICE_ACCOUNT_JSON)
         self.client = self.app.test_client()
         self.app.testing = True
 
