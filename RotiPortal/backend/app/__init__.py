@@ -25,9 +25,10 @@ def create_app():
         get_app()  # This will raise an exception if the app does not exist
     except ValueError:
         # Initialize Firebase app if it does not exist
-        initialize_app({
+        cred = credentials.Certificate(os.getenv('GOOGLE_APPLICATION_CREDENTIALS'))
+        initialize_app(cred, {
             "storageBucket": "gs://roti-portal-392216.appspot.com"
-        })  # No need to pass credentials explicitly
+        })
 
 
     # if service_account_json is None:
