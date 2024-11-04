@@ -6,7 +6,7 @@ from google.oauth2 import service_account
 from dotenv import load_dotenv
 firebase_initialized = False
 
-def create_app(service_account_json):
+def create_app():
     global firebase_initialized
     # Load environment variables from .env
     load_dotenv()
