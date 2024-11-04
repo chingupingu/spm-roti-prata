@@ -1,14 +1,6 @@
 {
   "version": 2,
-    "builds": [
-    {
-      "src": "RotiPortal/backend/run.py",
-      "use": "@vercel/python",
-      "config": {
-        "pythonVersion": "3.9",
-        "maxDuration": "15mb"
-      }
-    },
+  "builds": [
     {
       "src": "RotiPortal/frontend/dist/index.html",
       "use": "@vercel/static"
