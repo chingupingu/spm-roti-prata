@@ -5,7 +5,8 @@
       "src": "RotiPortal/backend/run.py",
       "use": "@vercel/python",
       "config": {
-        "pythonVersion": "3.9"
+        "pythonVersion": "3.9",
+        "maxDuration": "15mb"
       }
     },
     {
@@ -20,7 +21,7 @@
     },
     {
       "src": "/(.*)",
-      "dest": "RotiPortal/frontend/dist/$1"
+      "dest": "RotiPortal/frontend/dist/index.html"
     }
   ]
 }
