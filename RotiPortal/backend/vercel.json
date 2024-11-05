@@ -5,11 +5,36 @@
       "src": "app.py",
       "use": "@vercel/python",
       "config": {
-        "handler": "app.app"
+        "pythonVersion": "3.9",
+        "maxLambdaSize": "15mb"
       }
     }
   ],
   "routes": [
+    {
+      "src": "/employee/(.*)",
+      "dest": "app.py"
+    },
+    {
+      "src": "/wfh_request/(.*)",
+      "dest": "app.py"
+    },
+    {
+      "src": "/wfh_request_alert",
+      "dest": "app.py"
+    },
+    {
+      "src": "/alert_delegate",
+      "dest": "app.py"
+    },
+    {
+      "src": "/wfh_request_update_alert",
+      "dest": "app.py"
+    },
+    {
+      "src": "/delegate/(.*)",
+      "dest": "app.py"
+    },
     {
       "src": "/(.*)",
       "dest": "app.py"
