@@ -16,26 +16,29 @@ def create_app():
     CORS(app)  # Enable CORS for all routes
     app.config.from_object('app.config.Config')
 
-    try:
-        get_app()  # This will raise an exception if the app does not exist
-    except ValueError:
-        # # use this if running locally
-        # cred = credentials.Certificate(os.getenv('GOOGLE_APPLICATION_CREDENTIALS'))
-        # initialize_app(cred, {
-        #     "storageBucket": "gs://roti-portal-392216.appspot.com"
-        # })
+    # try:
+    #     get_app()  # This will raise an exception if the app does not exist
+    # except ValueError:
+    #     # use this if running locally
+    #     cred = credentials.Certificate(os.getenv('GOOGLE_APPLICATION_CREDENTIALS'))
+    #     initialize_app(cred, {
+    #         "storageBucket": "gs://roti-portal-392216.appspot.com"
+    #     })
 
-        # use this if running on vercel
-        google_application_credentials = os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
-        if google_application_credentials:
-            cred_json = json.loads(google_application_credentials)
-            # cred = credentials.Certificate(cred_json)
-            credentials, project_id = load_credentials_from_dict(cred_json)
-            initialize_app(credentials, {
+    # use this if running on vercel
+    google_credentials_json = os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
+    if google_credentials_json:
+        try:
+            # Parse the JSON string from environment variable
+            credentials_dict = json.loads(google_credentials_json)
+            cred = credentials.Certificate(credentials_dict)
+            initialize_app(cred, {
                 "storageBucket": "gs://roti-portal-392216.appspot.com"
             })
-        else:
-            print("Warning: GOOGLE_APPLICATION_CREDENTIALS not found in environment")
+        except Exception as e:
+            print(f"Error initializing Firebase: {e}")
+    else:
+        print("Warning: GOOGLE_APPLICATION_CREDENTIALS not found in environment")
 
 
 
