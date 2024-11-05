@@ -1,7 +1,7 @@
 import json
 import unittest
 from unittest.mock import patch, Mock
-from handler import create_app
+from app import create_app
 
 class MockEmployee:
     def __init__(self, staff_id, first_name, last_name, dept, position):
