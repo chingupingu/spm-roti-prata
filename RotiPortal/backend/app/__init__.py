@@ -3,7 +3,7 @@ import json
 from flask import Flask
 from flask_cors import CORS
 from firebase_admin import credentials, initialize_app, firestore, get_app
-from google.oauth2 import service_account
+from google.auth import load_credentials_from_dict
 from dotenv import load_dotenv
 firebase_initialized = False
 
@@ -29,12 +29,13 @@ def create_app():
         google_application_credentials = os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
         if google_application_credentials:
             cred_json = json.loads(google_application_credentials)
-            cred = credentials.Certificate(cred_json)
-            initialize_app(cred, {
+            # cred = credentials.Certificate(cred_json)
+            credentials, project_id = load_credentials_from_dict(cred_json)
+            initialize_app(credentials, {
                 "storageBucket": "gs://roti-portal-392216.appspot.com"
             })
         else:
-            print("Warning: FIREBASE_CREDENTIALS not found in environment")
+            print("Warning: GOOGLE_APPLICATION_CREDENTIALS not found in environment")
 
 
 
