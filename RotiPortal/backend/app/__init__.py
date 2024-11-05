@@ -51,21 +51,4 @@ def create_app():
     # Optionally store the db in the app config or a global variable
     app.config['DB'] = db  # Store db in app config if needed
 
-    # # Add a test route to verify Firebase connection
-    # @app.route('/test-firebase')
-    # def test_firebase():
-    #     try:
-    #         # Try to access Firestore
-    #         docs = db.collection('test').limit(1).get()
-    #         return {
-    #             "status": "success",
-    #             "message": "Firebase connection successful",
-    #             "project_id": db.project
-    #         }
-    #     except Exception as e:
-    #         return {
-    #             "status": "error",
-    #             "message": str(e)
-    #         }
-
     return app  # Return only the app object
