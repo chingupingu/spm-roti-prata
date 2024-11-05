@@ -329,7 +329,7 @@ export default {
             return today;
         },
         getEmployees() {
-            axios.get("http://127.0.0.1:5000/employee")
+            axios.get("https://spm-roti-prata.onrender.com/employee")
             .then((response) => {
                 this.employees = response.data;
             })
@@ -338,7 +338,7 @@ export default {
             });
         },
         getApprovedRequests() {
-            axios.get("http://127.0.0.1:5000/wfh_request")
+            axios.get("https://spm-roti-prata.onrender.com/wfh_request")
             .then((response) => {
                 const allRequests = response.data;
                 for (const request of allRequests) {

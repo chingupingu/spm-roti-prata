@@ -162,7 +162,7 @@ onMounted(async () => {
     const user_dept = employee_obj.Dept;
     const user_role = employee_obj.Role;
 
-    const response = await axios.get('http://127.0.0.1:5000/wfh_request/deptSchedule', {
+    const response = await axios.get('https://spm-roti-prata.onrender.com/wfh_request/deptSchedule', {
       headers: {
         'Dept': user_dept,
         'Role': user_role

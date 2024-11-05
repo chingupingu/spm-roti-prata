@@ -159,7 +159,7 @@ export default {
     },
     methods: {
         async fetchEmployees() {
-            axios.get('http://127.0.0.1:5000/employee')
+            axios.get('https://spm-roti-prata.onrender.com/employee')
             .then(response => {
                 this.employees = response.data
             })
@@ -168,7 +168,7 @@ export default {
             })
         },
         async fetchExistingDelegates() {
-            axios.get('http://127.0.0.1:5000/delegate')
+            axios.get('https://spm-roti-prata.onrender.com/delegate')
             .then(response => {
                 this.existingDelegates = response.data.filter(delegate => delegate.manager_id === this.employee_obj.Staff_ID)
                 console.log(this.existingDelegates)
@@ -201,7 +201,7 @@ export default {
                 startDate: this.startDate,
                 endDate: this.endDate
             };
-            axios.post("http://127.0.0.1:5000/alert_delegate", payload)
+            axios.post("https://spm-roti-prata.onrender.com/alert_delegate", payload)
             .then(response => {
                 console.log(response.data)
                 if (response.status == 201) {
@@ -220,7 +220,7 @@ export default {
                     end_date: this.endDate,
                     dept: this.employee_obj.Dept
                 }
-            axios.post('http://127.0.0.1:5000/delegate', delegateData)
+            axios.post('https://spm-roti-prata.onrender.com/delegate', delegateData)
             .then(response => {
                 console.log(response.data)
                 window.alert("Delegation created successfully!")
@@ -241,7 +241,7 @@ export default {
             return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
         },
         revokeDelegation(doc_id) {
-            axios.delete(`http://127.0.0.1:5000/delegate/${doc_id}`)
+            axios.delete(`https://spm-roti-prata.onrender.com/delegate/${doc_id}`)
             .then(response => {
                 console.log(response.data)
                 window.alert("Delegation revoked successfully!")

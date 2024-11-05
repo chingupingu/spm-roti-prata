@@ -4,7 +4,7 @@ FLOW OF DATA:
 - frontend should never interact directly with database; this is to decouple components of our webapp
 - instead, the flow will be as such:
     1. user interacts with frontend
-    2. frontend javascript handles the request by sending a HTTP request to an endpoint (flask route e.g. http://127.0.0.1:5000/employee/doc_id)
+    2. frontend javascript handles the request by sending a HTTP request to an endpoint (flask route e.g. https://spm-roti-prata.onrender.com/employee/doc_id)
     3. this endpoint belongs to a function of a service in our backend (e.g. the above endpoint belongs to the get_employee() function
     of our employee_services.py)
     4. this service function calls a function in the associated repository (e.g. get_employee() in employee_service.py calls

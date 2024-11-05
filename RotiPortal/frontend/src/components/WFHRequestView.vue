@@ -386,7 +386,7 @@ export default {
                 ...this.wfhRequest,
                 dates: this.wfhRequest.dates.map(date => new Date(date).toISOString()), // Convert to ISO format
             };
-            axios.post("http://127.0.0.1:5000/wfh_request/validate", this.wfhRequest)
+            axios.post("https://spm-roti-prata.onrender.com/wfh_request/validate", this.wfhRequest)
             .then(response => {
                 if (response.data.valid) {
                     if (response.data.message) {
@@ -409,7 +409,7 @@ export default {
         // // OLD validate
         // validateWfhRequest() {
         //     // Logic to validate WFH request
-        //     axios.post("http://127.0.0.1:5000/wfh_request/validate", this.wfhRequest)
+        //     axios.post("https://spm-roti-prata.onrender.com/wfh_request/validate", this.wfhRequest)
         //     .then(response => {
         //         if (response.data.valid) {
         //             if (response.data.message) {
@@ -436,7 +436,7 @@ export default {
             };
 
             // Logic to submit WFH request
-            axios.post("http://127.0.0.1:5000/wfh_request", requestPayload)
+            axios.post("https://spm-roti-prata.onrender.com/wfh_request", requestPayload)
             .then(response => {
                 console.log(response.data)
                 console.log(response.status)
@@ -469,7 +469,7 @@ export default {
             })
         },
         alertSupervisor() {
-            axios.post("http://127.0.0.1:5000/wfh_request_alert", this.wfhRequest)
+            axios.post("https://spm-roti-prata.onrender.com/wfh_request_alert", this.wfhRequest)
             .then(response => {
                 console.log(response.data)
                 if (response.status == 201) {
@@ -481,7 +481,7 @@ export default {
             })
         },
         populateWfhRequests() {
-            axios.get(`http://127.0.0.1:5000/wfh_request/staff/${this.employee_obj.Staff_ID}`)
+            axios.get(`https://spm-roti-prata.onrender.com/wfh_request/staff/${this.employee_obj.Staff_ID}`)
             .then(response => {
                 this.your_requests = response.data
             })
@@ -490,7 +490,7 @@ export default {
             })
         },
         viewRequest(request_id) {
-            axios.get(`http://127.0.0.1:5000/wfh_request/${request_id}`)
+            axios.get(`https://spm-roti-prata.onrender.com/wfh_request/${request_id}`)
             .then(response => {
                 this.selectedRequest = response.data
             })
@@ -505,7 +505,7 @@ export default {
         // Method to withdraw a request
         withdrawRequest(requestId) {
             this.selectedRequestId = requestId; // Store the request ID for withdrawal
-            axios.get(`http://127.0.0.1:5000/wfh_request/${requestId}`)
+            axios.get(`https://spm-roti-prata.onrender.com/wfh_request/${requestId}`)
             .then(response => {
                 this.selectedRequest = response.data
             })
@@ -521,7 +521,7 @@ export default {
             };
 
             // Update the request status on the server
-            axios.put(`http://127.0.0.1:5000/wfh_request/${this.selectedRequestId}`, payload)
+            axios.put(`https://spm-roti-prata.onrender.com/wfh_request/${this.selectedRequestId}`, payload)
                 .then(() => {
                     // Update local state to reflect withdrawal
                     const index = this.your_requests.findIndex(request => request.request_id === this.selectedRequestId);
@@ -542,7 +542,7 @@ export default {
             };
 
             // Make the API call to update the status in the backend
-            axios.put(`http://127.0.0.1:5000/wfh_request/${requestId}`, payload)
+            axios.put(`https://spm-roti-prata.onrender.com/wfh_request/${requestId}`, payload)
                 .then(() => {  
                 })
                 .catch(error => {
@@ -559,7 +559,7 @@ export default {
             // Method to retrieve request details for withdrawal
         withdrawRequest(requestId) {
             this.selectedRequestId = requestId; // Store the request ID for withdrawal
-            axios.get(`http://127.0.0.1:5000/wfh_request/${requestId}`)
+            axios.get(`https://spm-roti-prata.onrender.com/wfh_request/${requestId}`)
                 .then(response => {
                     this.selectedRequest = response.data;
                 })
@@ -575,7 +575,7 @@ export default {
             };
 
             // Update the request status on the server
-            axios.put(`http://127.0.0.1:5000/wfh_request/${this.selectedRequestId}`, payload)
+            axios.put(`https://spm-roti-prata.onrender.com/wfh_request/${this.selectedRequestId}`, payload)
                 .then(() => {
                     // Update local state to reflect withdrawal
                     const index = this.your_requests.findIndex(request => request.request_id === this.selectedRequestId);
@@ -593,7 +593,7 @@ export default {
         // Method to retrieve request details for cancellation
         cancelRequest(requestId) {
             this.selectedRequestId = requestId; // Store the request ID for cancellation
-            axios.get(`http://127.0.0.1:5000/wfh_request/${requestId}`)
+            axios.get(`https://spm-roti-prata.onrender.com/wfh_request/${requestId}`)
                 .then(response => {
                     this.selectedRequest = response.data;
                 })
@@ -609,7 +609,7 @@ export default {
             };
 
             // Update the request status on the server
-            axios.put(`http://127.0.0.1:5000/wfh_request/${this.selectedRequestId}`, payload)
+            axios.put(`https://spm-roti-prata.onrender.com/wfh_request/${this.selectedRequestId}`, payload)
                 .then(() => {
                     // Update local state to reflect cancellation
                     const index = this.your_requests.findIndex(request => request.request_id === this.selectedRequestId);
@@ -631,7 +631,7 @@ export default {
             };
 
             // Make the API call to update the status in the backend
-            axios.put(`http://127.0.0.1:5000/wfh_request/${requestId}`, payload)
+            axios.put(`https://spm-roti-prata.onrender.com/wfh_request/${requestId}`, payload)
                 .then(() => {  
                     // Optionally handle post-confirmation actions
                 })

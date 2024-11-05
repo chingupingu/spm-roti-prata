@@ -135,7 +135,7 @@
     try {
       employee_obj = JSON.parse(sessionStorage.getItem("employee_obj"))
       staff_id = employee_obj.Staff_ID
-      const response = await axios.get('http://127.0.0.1:5000/wfh_request/staff/' + staff_id)
+      const response = await axios.get('https://spm-roti-prata.onrender.com/wfh_request/staff/' + staff_id)
       scheduleData.value = response.data
     } catch (error) {
       console.error('Error fetching schedule data:', error)

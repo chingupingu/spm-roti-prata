@@ -231,7 +231,7 @@ export default {
             this.commentModalVisible = false;
         },
         viewRequest(request_id) {
-            axios.get(`http://127.0.0.1:5000/wfh_request/${request_id}`)
+            axios.get(`https://spm-roti-prata.onrender.com/wfh_request/${request_id}`)
             .then(response => {
                 this.selectedRequest = response.data
             })
@@ -247,7 +247,7 @@ export default {
             };
 
             // Make the API call to update the status in the backend
-            axios.put(`http://127.0.0.1:5000/wfh_request/${requestId}`, payload)
+            axios.put(`https://spm-roti-prata.onrender.com/wfh_request/${requestId}`, payload)
                 .then(() => {  
                 })
                 .catch(error => {
@@ -279,7 +279,7 @@ export default {
             }
 
             // Send a PUT request to the server to update the request
-            axios.put(`http://127.0.0.1:5000/wfh_request/${requestId}`, payload)
+            axios.put(`https://spm-roti-prata.onrender.com/wfh_request/${requestId}`, payload)
                 .then(() => {
                     console.log(`Request ${requestId} rejected with comment: ${comment}`);
                 })
@@ -305,7 +305,7 @@ export default {
             approving_manager: approving_manager
             }
 
-            axios.post("http://127.0.0.1:5000/wfh_request_update_alert", payload)
+            axios.post("https://spm-roti-prata.onrender.com/wfh_request_update_alert", payload)
             .then(response => {
                 console.log(response.data)
                 if (response.status == 201) {
@@ -338,7 +338,7 @@ export default {
             }
         },
         // async fetchEmployeeData(staff_id) {
-        //     axios.get(`http://127.0.0.1:5000/employee/manager/${staff_id}`)
+        //     axios.get(`https://spm-roti-prata.onrender.com/employee/manager/${staff_id}`)
         //     .then(response => {
         //         this.employees = response.data
         //         this.fetchEmployeeRequests()
@@ -352,7 +352,7 @@ export default {
         async fetchEmployeeData(staff_id_list) {
             for (const staff_id of staff_id_list) {
                 try {
-                    const response = await axios.get(`http://127.0.0.1:5000/employee/manager/${staff_id}`)
+                    const response = await axios.get(`https://spm-roti-prata.onrender.com/employee/manager/${staff_id}`)
                     this.employees.push(...response.data)
                 } catch (error) {
                     console.log(error)
@@ -362,7 +362,7 @@ export default {
         },
         async fetchEmployeeRequests() {
             for (const employee of this.employees) {
-                axios.get(`http://127.0.0.1:5000/wfh_request/staff/${employee.Staff_ID}`)
+                axios.get(`https://spm-roti-prata.onrender.com/wfh_request/staff/${employee.Staff_ID}`)
                 .then(response => {
                     this.employee_requests.push(...response.data)
                 })
@@ -378,7 +378,7 @@ export default {
         },
         isDelegate(staff_id) {
             // check if the staff_id exists in the delegate collection
-            axios.get(`http://127.0.0.1:5000/delegate/${staff_id}`)
+            axios.get(`https://spm-roti-prata.onrender.com/delegate/${staff_id}`)
             .then(response => {
                 // if it does, fetch the delegate data
                 this.delegateData = response.data
@@ -404,7 +404,7 @@ export default {
             })
         },
         cleanupExpiredDelegates() {
-            axios.delete('http://127.0.0.1:5000/delegate/cleanup')
+            axios.delete('https://spm-roti-prata.onrender.com/delegate/cleanup')
             .then(response => {
                 console.log(response.data.message)
             })
