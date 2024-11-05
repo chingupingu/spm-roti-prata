@@ -1,4 +1,5 @@
 import os
+import json
 from flask import Flask
 from flask_cors import CORS
 from firebase_admin import credentials, initialize_app, firestore, get_app
@@ -15,37 +16,22 @@ def create_app():
     CORS(app)  # Enable CORS for all routes
     app.config.from_object('app.config.Config')
 
-    # # Initialize Firebase app
-    # cred = credentials.Certificate(os.getenv('GOOGLE_APPLICATION_CREDENTIALS'))
-    # initialize_app(cred, {
-    #     "storageBucket": "gs://roti-portal-392216.appspot.com"
-    # })
-
     try:
         get_app()  # This will raise an exception if the app does not exist
     except ValueError:
-        # Initialize Firebase app if it does not exist
-        cred = credentials.Certificate(os.getenv('GOOGLE_APPLICATION_CREDENTIALS'))
+        # # use this if running locally
+        # cred = credentials.Certificate(os.getenv('GOOGLE_APPLICATION_CREDENTIALS'))
+        # initialize_app(cred, {
+        #     "storageBucket": "gs://roti-portal-392216.appspot.com"
+        # })
+
+        # use this if running on vercel
+        cred_json = json.loads(os.getenv('GOOGLE_APPLICATION_CREDENTIALS'))
+        cred = credentials.Certificate(cred_json)
         initialize_app(cred, {
             "storageBucket": "gs://roti-portal-392216.appspot.com"
         })
 
-
-    # if service_account_json is None:
-    #     if not firebase_initialized:
-    #         # Use the credentials from the environment variable
-    #         cred = credentials.Certificate(os.getenv('GOOGLE_APPLICATION_CREDENTIALS'))
-    #         initialize_app(cred, {
-    #             "storageBucket": "gs://roti-portal-392216.appspot.com"
-    #         })
-    #         firebase_initialized = True
-    # else:
-    #     if not firebase_initialized:
-    #         cred = service_account.Credentials.from_service_account_info(service_account_json)
-    #         initialize_app(cred, {
-    #             "storageBucket": "gs://roti-portal-392216.appspot.com"
-    #         })
-    #         firebase_initialized = True
 
     # Initialize Firestore
     db = firestore.Client()
