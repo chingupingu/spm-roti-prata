@@ -35,6 +35,10 @@ def create_app():
             initialize_app(cred, {
                 "storageBucket": "gs://roti-portal-392216.appspot.com"
             })
+            db = firestore.Client(
+                project=credentials_dict['project_id'],
+                credentials=cred
+            )
         except Exception as e:
             print(f"Error initializing Firebase: {e}")
     else:
@@ -43,9 +47,8 @@ def create_app():
 
 
     # Initialize Firestore
-    db = firestore.Client()
-    # db = firestore.Client(project=cred_json.get('project_id'))
-
+    # db = firestore.Client()
+    
 
     # Register routes
     with app.app_context():
