@@ -31,19 +31,26 @@ def create_app():
         try:
             # Parse the JSON string from environment variable
             credentials_dict = json.loads(google_credentials_json)
-            cred = credentials.Certificate(credentials_dict)
-            initialize_app(cred, {
+            
+            # For Firebase Admin initialization
+            firebase_cred = credentials.Certificate(credentials_dict)
+            initialize_app(firebase_cred, {
                 "storageBucket": "gs://roti-portal-392216.appspot.com"
             })
+            
+            # For Firestore initialization
+            google_cred, project_id = load_credentials_from_dict(credentials_dict)
             db = firestore.Client(
-                project=credentials_dict['project_id'],
-                credentials=cred
+                project=project_id,
+                credentials=google_cred
             )
         except Exception as e:
             print(f"Error initializing Firebase: {e}")
+            # Initialize a default db to prevent UnboundLocalError
+            db = None
     else:
         print("Warning: GOOGLE_APPLICATION_CREDENTIALS not found in environment")
-
+        db = None
 
 
     # Initialize Firestore
