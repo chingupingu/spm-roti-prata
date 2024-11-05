@@ -26,11 +26,16 @@ def create_app():
         # })
 
         # use this if running on vercel
-        cred_json = json.loads(os.getenv('GOOGLE_APPLICATION_CREDENTIALS'))
-        cred = credentials.Certificate(cred_json)
-        initialize_app(cred, {
-            "storageBucket": "gs://roti-portal-392216.appspot.com"
-        })
+        google_application_credentials = os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
+        if google_application_credentials:
+            cred_json = json.loads(google_application_credentials)
+            cred = credentials.Certificate(cred_json)
+            initialize_app(cred, {
+                "storageBucket": "gs://roti-portal-392216.appspot.com"
+            })
+        else:
+            print("Warning: FIREBASE_CREDENTIALS not found in environment")
+
 
 
     # Initialize Firestore
