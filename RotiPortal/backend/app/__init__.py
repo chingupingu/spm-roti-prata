@@ -43,8 +43,8 @@ def create_app():
 
 
     # Initialize Firestore
-    # db = firestore.Client()
-    db = firestore.Client(project=cred_json.get('project_id'))
+    db = firestore.Client()
+    # db = firestore.Client(project=cred_json.get('project_id'))
 
 
     # Register routes
