@@ -2,7 +2,7 @@
   "version": 2,
   "builds": [
     {
-      "src": "RotiPortal/backend/run.py",
+      "src": "run.py",
       "use": "@vercel/python",
       "config": {
         "pythonVersion": "3.9",
@@ -13,7 +13,7 @@
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "RotiPortal/backend/run.py"
+      "dest": "run.py"
     }
   ],
   "env": {
