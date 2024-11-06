@@ -25,7 +25,10 @@ def create_app():
     #         "storageBucket": "gs://roti-portal-392216.appspot.com"
     #     })
 
-    # use this if running on vercel
+    # Initialize Firestore
+    # db = firestore.Client()
+
+    # use this if running on Render (deployed)
     google_credentials_json = os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
     if google_credentials_json:
         try:
@@ -52,9 +55,6 @@ def create_app():
         print("Warning: GOOGLE_APPLICATION_CREDENTIALS not found in environment")
         db = None
 
-
-    # Initialize Firestore
-    # db = firestore.Client()
     
 
     # Register routes
